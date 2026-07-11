@@ -1,0 +1,42 @@
+.page-not-found-page{
+  background-image: url("/background/page404_background.svg");
+  background-repeat: no-repeat;
+  background-size: 144%;
+  background-position-x: -474px;
+  background-position-y: -965px;
+
+  height: 100vh;
+}
+
+
+.human404-walking{
+  background-image: url("/background/page404_human404.svg");
+  background-repeat: no-repeat;
+  background-size: 53.2%;
+  background-position-x: 848px;
+  background-position-y: 129px;
+
+  height: inherit;
+}
+
+
+.font-page-not-found{
+  font-family: nunito,
+      "Segoe UI", Roboto, Helvetica, Arial,
+      "Inter", -apple-system, BlinkMacSystemFont,
+      sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol", system-ui, sans-serif;
+  font-size: 4.53rem;
+  line-height: 140%;
+  letter-spacing: calc(4.53rem *0.03);
+  font-weight: 700; /* bold nunito */
+}
+
+
+.page-not-found-word-go-home{
+  position: fixed;
+  z-index: 100;
+
+  left: 10vw;
+  top: 36vh;
+}
