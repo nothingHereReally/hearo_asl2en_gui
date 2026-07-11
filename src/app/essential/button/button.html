@@ -1,0 +1,68 @@
+@if( isUnderlined()!="underlined" && styleButton()!="style-link" && linkURL()==''){
+<button type="button" [class]="[
+  'button-padding-left-right',
+  'button-padding-top-bottom',
+  'font-normal-regular',
+  'border-radius',
+  'flex-row-button',
+  styleButton()
+  ]"
+    (click)="onClick()"
+    (mouseenter)="onHover()"
+    (mouseleave)="initIcon()"
+    (mousedown)="onPressing()"
+    (mouseup)="onHover()"
+  >
+    @if(iconfiledir()!=''){
+      <img [src]="iconfiledir()" [alt]="iconfiledir()" class='icon-botton-size'>
+    }
+    <span [class]='[isUnderlined()]'>{{ btnText() }}</span>
+</button>
+}@else if( linkTarget()==="_self" ){
+<a [class]="[
+  'button-padding-left-right',
+  'button-padding-top-bottom',
+  'font-normal-regular',
+  'border-radius',
+  'flex-row-button',
+  styleButton(),
+  isUnderlined()
+  ]"
+    (click)="onClick()"
+    (mouseenter)="onHover()"
+    (mouseleave)="initIcon()"
+    (mousedown)="onPressing()"
+    (mouseup)="onHover()"
+    [routerLink]="linkURL()"
+    [state]="{ past_path: currentPath() }"
+    [target]="linkTarget()"
+  >
+    @if(iconfiledir()!=''){
+      <img [src]="iconfiledir()" [alt]="iconfiledir()" class='icon-botton-size'>
+    }
+    <span [class]='[isUnderlined()]'>{{ btnText() }}</span>
+</a>
+}@else{
+<a [class]="[
+  'button-padding-left-right',
+  'button-padding-top-bottom',
+  'font-normal-regular',
+  'border-radius',
+  'flex-row-button',
+  styleButton(),
+  isUnderlined()
+  ]"
+    (click)="onClick()"
+    (mouseenter)="onHover()"
+    (mouseleave)="initIcon()"
+    (mousedown)="onPressing()"
+    (mouseup)="onHover()"
+    [routerLink]="linkURL()"
+    [target]="linkTarget()"
+  >
+    @if(iconfiledir()!=''){
+      <img [src]="iconfiledir()" [alt]="iconfiledir()" class='icon-botton-size'>
+    }
+    <span [class]='[isUnderlined()]'>{{ btnText() }}</span>
+</a>
+}

@@ -1,0 +1,146 @@
+.style-solid{
+  color: var(--sc-900);
+  background-color: var(--pc1-300);
+  border-width: 0px;
+  transition: var(--time-regular);
+}
+.style-solid:hover{
+  background-color: var(--pc1-400);
+}
+.style-solid:active{
+  background-color: var(--pc1-200);
+}
+
+
+
+
+.style-outline{
+  color: var(--pc1-300);
+  background-color: transparent;
+  border: 1px solid var(--pc1-300);
+  transition: var(--time-regular);
+}
+.style-outline:hover{
+  background-color: var(--pc1-800);
+}
+.style-outline:active{
+  color: var(--sc-900);
+  background-color: var(--pc1-200);
+  border: 1px solid var(--pc1-200);
+}
+
+
+
+
+.style-naked{
+  color: var(--pc1-300);
+  background-color: transparent;
+  border-width: 0px;
+  transition: var(--time-regular);
+}
+.style-naked:hover{
+  background-color: var(--pc1-800);
+}
+.style-naked:active{
+  background-color: var(--pc1-600);
+}
+
+
+
+
+.style-special{
+  color: var(--sc-900);
+  border-width: 0px;
+  background-image: var(--gradiant-g1);
+  background-size: 150%;
+  background-position: center;
+  transition: var(--time-regular-background-position);
+  width: 100%;
+}
+.style-special:hover{
+  background-position: left;
+}
+.style-special:active{
+  background-position: right;
+}
+
+
+
+
+.style-link{
+  color: var(--tc2-400);
+  background-color: transparent;
+  border: 1px solid var(--tc2-400);
+  transition: var(--time-regular);
+}
+.style-link:hover{
+  background-color: var(--tc2-800);
+}
+.style-link:active{
+  color: var(--sc-900);
+  background-color: var(--tc2-200);
+  border: 1px solid var(--tc2-200);
+}
+
+
+
+
+.style-danger-solid{
+  color: var(--sc-900);
+  background-color: var(--tc3-500);
+  border-width: 0px;
+  transition: var(--time-regular);
+}
+.style-danger-solid:hover{
+  color: var(--tc3-500);
+  background-color: var(--tc3-800);
+}
+.style-danger-solid:active{
+  color: var(--sc-900);
+  background-color: var(--tc3-300);
+}
+
+
+
+
+.style-danger-outline{
+  color: var(--tc3-500);
+  background-color: transparent;
+  border: 1px solid var(--tc3-500);
+  transition: var(--time-regular);
+}
+.style-danger-outline:hover{
+  background-color: var(--tc3-800);
+}
+.style-danger-outline:active{
+  color: var(--sc-900);
+  background-color: var(--tc3-300);
+  border: 1px solid var(--tc3-300);
+}
+
+
+
+
+.style-danger-naked{
+  color: var(--tc3-500);
+  background-color: transparent;
+  border-width: 0px;
+  transition: var(--time-regular);
+}
+.style-danger-naked:hover{
+  background-color: var(--tc3-800);
+}
+.style-danger-naked:active{
+  color: var(--sc-900);
+  background-color: var(--tc3-300);
+}
+
+
+
+
+.not-underlined{
+  text-decoration: none;
+}
+.underlined{
+  text-decoration: underline;
+}
