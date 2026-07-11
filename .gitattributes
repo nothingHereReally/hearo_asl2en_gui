@@ -1,0 +1,2 @@
+public/font/nunito-bold.woff2 filter=lfs diff=lfs merge=lfs -text
+public/font/nunito-regular.woff2 filter=lfs diff=lfs merge=lfs -text
