@@ -35,4 +35,16 @@ export class Asl2enService{
       }
     );
   }
+
+  public async asl2en2ws(image: Blob): Promise<string>{
+    const asl2en: Asl2EnImageModel= await firstValueFrom(this.http.post<Asl2EnImageModel>(
+      `${env.API_DOMAIN.http}${this.api_prefix}/asl2en/${this.asl2enWsHttpPostUuid}/`,
+      image,
+      { observe: 'body' }
+    ));
+    if( asl2en.uuid!=null ){
+      this.asl2enWsHttpPostUuid= asl2en.uuid;
+    }
+    return asl2en.details;
+  }
 }
