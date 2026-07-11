@@ -2,11 +2,11 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 
 import { environment as env } from '../../environment/environment';
-import { Asl2EnSoloModel } from '../model/asl2en-model';
+import { Asl2EnImageModel, Asl2EnModel } from '../model/asl2en-model';
 
 
 @Injectable({
@@ -15,9 +15,10 @@ import { Asl2EnSoloModel } from '../model/asl2en-model';
 export class Asl2enService{
   private readonly api_prefix: string= '/api/v1';
   private readonly http: HttpClient= inject(HttpClient);
+  private asl2enWsHttpPostUuid: string= "init";
 
 
-  public asl2enSolo(images: Array<Blob>): Observable<Asl2EnSoloModel>{
+  public asl2enSolo(images: Array<Blob>): Observable<Asl2EnModel>{
     if( images.length!=22 ){
       throw new Error("implementation incorrect, due to length of array `images` should be 22");
     }
@@ -26,7 +27,7 @@ export class Asl2enService{
       formData.append(`image${idx+1}`, blob, `image${idx+1}.jpeg`);
     });
 
-    return this.http.post<Asl2EnSoloModel>(
+    return this.http.post<Asl2EnModel>(
       `${env.API_DOMAIN.http}${this.api_prefix}/asl2en/`,
       formData,
       {
