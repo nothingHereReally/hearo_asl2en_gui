@@ -778,21 +778,9 @@ html, body {
 
 
 
-.text-wrap-284px-max-width{
+.text-wrap-391px-max-width{
   word-wrap: break-word;
-  max-width: 16.7rem;
-}
-.text-wrap-370px-max-width{
-  word-wrap: break-word;
-  max-width: 21.8rem;
-}
-.text-wrap-300px-max-width{
-  word-wrap: break-word;
-  max-width: 17.6rem;
-}
-.text-wrap-560px-max-with{
-  word-wrap: break-word;
-  max-width: 33rem;
+  max-width: 23rem;
 }
 .flex-wrap-row{
   flex-wrap: wrap;
@@ -858,6 +846,15 @@ html, body {
 
 
 
+/* -------------------------------------------- */
+/* width configs */
+/* -------------------------------------------- */
+.video-camera-container{
+  width: 40vw;
+}
+.width-inherit{
+  width: inherit;
+}
 
 
 
