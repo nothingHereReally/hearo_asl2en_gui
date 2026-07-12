@@ -8,6 +8,7 @@ import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { environment as env } from '../../environment/environment';
 import { Asl2EnImageModel, Asl2EnModel } from '../model/asl2en-model';
 import { ErrorDetail } from '../model/errors-model';
+import { sleepAsync } from '../tools';
 
 
 @Injectable({
@@ -67,17 +68,19 @@ export class Asl2enService{
   }
   public async asl2en2ws(image: Blob): Promise<string>{
     let asl2en: Asl2EnImageModel;
+    const formData: FormData= new FormData();
+    formData.append('image', image, 'image.jpeg');
     try{
       asl2en= await firstValueFrom(this.http.post<Asl2EnImageModel>(
         `${env.API_DOMAIN.http}${this.api_prefix}/asl2en/${this.asl2enWsHttpPostUuid}/`,
-        image,
+        formData,
         { observe: 'body' }
       ));
     }catch(err){
       this.asl2enWsHttpPostUuid= 'init';
       asl2en= await firstValueFrom(this.http.post<Asl2EnImageModel>(
         `${env.API_DOMAIN.http}${this.api_prefix}/asl2en/${this.asl2enWsHttpPostUuid}/`,
-        image,
+        formData,
         { observe: 'body' }
       ));
     }
