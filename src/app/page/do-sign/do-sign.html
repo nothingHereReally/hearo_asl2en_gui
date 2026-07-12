@@ -15,21 +15,36 @@
         <div class="video-camera-container">
           <video
               #videoEl
-              class="video-qr">
+              class="
+              width-inherit
+              border-radius
+              ">
           </video>
         </div>
     }@else{
-        <div class="ask-user-for-camera-permission">
-          <img src="/icon_tc3_500/info.svg" alt="red info icon">
+        <div class="
+        flex-row
+        gap-pad100-xs
+        flex-align-center
+        text-wrap-391px-max-width
+        border-radius
+        font-color-fail
+        background-color-fail
+        padding-left-right-pad100-xl
+        padding-top-bottom-pad100-xl
+        ">
+          <img class="logo-height-48px" src="/icon_tc3_500/info.svg" alt="red info icon">
           <p class="font-normal-title">Please give us permission to access the Camera for us to know the signs that you are doing. If you haven’t blocked the camera access yet, you can refresh this page for your browser to ask for the camera permission again. Otherwise please unblock us and allow us Camera access.</p>
         </div>
     }
-    <div>
-      <div>
-        <img src="/logo/hearo_logo.svg" alt="hearo logo">
-        <img src="/logo/hearo_word.svg" alt="hearo word">
-        <span>ASL to Gloss</span>
-      </div>
+    <div class="
+    flex-column
+    gap-pad100-md
+    flex-align-center
+    ">
+      <img class="logo-height-48px" src="/logo/hearo_logo.svg" alt="hearo logo">
+      <img class="logo-height-36px" src="/logo/hearo_word.svg" alt="hearo word">
+      <span>ASL to Gloss</span>
     </div>
   </div>
 
