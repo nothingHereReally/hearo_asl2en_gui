@@ -48,7 +48,7 @@ export class DoSign implements AfterViewInit, OnDestroy{
           facingMode: 'user',
           frameRate: { ideal: 24, max: 30}
         },
-        audio: true
+        audio: false
       });
       this.videoElRef().nativeElement.srcObject= this.mediaStream;
       this.videoElRef().nativeElement.onloadedmetadata= ()=>{
@@ -63,10 +63,10 @@ export class DoSign implements AfterViewInit, OnDestroy{
       sleepAsync(1000*24, ()=>{
         this.__stopVideoCamera();
       });
-      while( this.keepVideoCameraRolling() && this.hasAllowedCamera() ){
-        await sleepAsync(env.TIME_DELAY_ASL2EN);
-        await this.__doAsl2en();
-      }
+      // while( this.keepVideoCameraRolling() && this.hasAllowedCamera() ){
+      //   await sleepAsync(env.TIME_DELAY_ASL2EN);
+      //   await this.__doAsl2en();
+      // }
     }catch(err){
       /* denied camera access permission by user */
       this.hasAllowedCamera.set(false);
