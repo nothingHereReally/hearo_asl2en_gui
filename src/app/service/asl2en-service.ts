@@ -60,6 +60,11 @@ export class Asl2enService{
       this.wsAsl2en.onclose= ()=>{ this.wsAsl2en= undefined; };
     });
   }
+  public closeWsAsl2en(): void{
+    if( this.wsAsl2en?.readyState===WebSocket.OPEN){
+      this.wsAsl2en?.close(1000, 'Recommended to close, due to No hands for a long time was detected');
+    }
+  }
   public async asl2en2ws(image: Blob): Promise<string>{
     let asl2en: Asl2EnImageModel;
     try{
@@ -76,6 +81,7 @@ export class Asl2enService{
         { observe: 'body' }
       ));
     }
+
     if( asl2en.uuid!=null ){
       this.asl2enWsHttpPostUuid= asl2en.uuid;
       await this.__asl2enWsConnect();
