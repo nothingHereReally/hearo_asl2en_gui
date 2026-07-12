@@ -8,7 +8,6 @@ import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { environment as env } from '../../environment/environment';
 import { Asl2EnImageModel, Asl2EnModel } from '../model/asl2en-model';
 import { ErrorDetail } from '../model/errors-model';
-import { sleepAsync } from '../tools';
 
 
 @Injectable({
