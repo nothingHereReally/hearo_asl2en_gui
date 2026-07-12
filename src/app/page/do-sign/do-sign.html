@@ -1,1 +1,41 @@
-<p>do-sign works!</p>
+<div>
+  <div class="top-left-logo-and-back-v2r">
+    <img src="/logo/hearo_logo.svg" alt="logo icon">
+  </div>
+
+
+  <div class="container-of-form-show-qr-v2r">
+    @if( hasAllowedCamera() ){
+    <div class="video-camera-container">
+      <video
+          #videoEl
+          class="video-qr">
+      </video>
+    </div>
+    }@else{
+    <div class="ask-user-for-camera-permission">
+      <img src="/icon_tc3_500/info.svg" alt="red info icon">
+      <p class="font-normal-title">Please give us permission to access the Camera for us to know the signs that you are doing. If you haven’t blocked the camera access yet, you can refresh this page for your browser to ask for the camera permission again. Otherwise please unblock us and allow us Camera access.</p>
+    </div>
+    }
+    <div>
+      <div>
+        <img src="/logo/hearo_logo.svg" alt="hearo logo">
+        <img src="/logo/hearo_word.svg" alt="hearo word">
+        <span>ASL to Gloss</span>
+      </div>
+      <!--<div>
+        <img src="/icon_tc2_400/info.svg" alt="info logo">
+        <div>
+          <span>Please show the</span>
+          <span>QR Access account</span>
+          <span>to be able to create a Hearo member account</span>
+        </div>
+      </div>-->
+    </div>
+  </div>
+
+  <div [hidden]="true">
+    <canvas #canvasEl></canvas>
+  </div>
+</div>
