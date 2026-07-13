@@ -838,8 +838,8 @@ html, body {
 /* -------------------------------------------- */
 /* width configs */
 /* -------------------------------------------- */
-.video-camera-container{
-  width: 40vw;
+.video-camera-reponsive{
+  max-width: min(95vw, 1200px);
 }
 .width-inherit{
   width: inherit;
