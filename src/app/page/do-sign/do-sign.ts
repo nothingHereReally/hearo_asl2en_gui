@@ -73,6 +73,7 @@ export class DoSign implements AfterViewInit, OnDestroy{
                 this.asl2enPredictedGlosses.set(
                   `${this.asl2enPredictedGlosses()}${this.asl2enWsPrediction().prediction[0].gloss}--${Number(this.asl2enWsPrediction().prediction[0].accuracy.toFixed(5))*100}  🚀`
                 );
+                console.log(this.asl2enPredictedGlosses());
               }
             }else if( (msg as ErrorDetail)?.details ){
               this.asl2enWsError.set(msg as ErrorDetail);
