@@ -28,7 +28,7 @@ export class DoSign implements AfterViewInit, OnDestroy{
     detail: undefined,
     details: undefined
   });
-  protected asl2enPredictedGlosses: WritableSignal<string>= signal('');
+  protected asl2enPredictedGlosses: WritableSignal<Array<string>>= signal([]);
 
 
   readonly videoElRef: Signal<ElementRef<HTMLVideoElement>>= viewChild.required<ElementRef<HTMLVideoElement>>('videoEl');
@@ -70,11 +70,16 @@ export class DoSign implements AfterViewInit, OnDestroy{
             if( (msg as Asl2EnModel)?.prediction ){
               this.asl2enWsPrediction.set(msg as Asl2EnModel);
               if( this.asl2enWsPrediction().prediction[0].accuracy > 0.7 ){
-                this.asl2enPredictedGlosses.set(
-                  `${this.asl2enPredictedGlosses()}${this.asl2enWsPrediction().prediction[0].gloss}--${(this.asl2enWsPrediction().prediction[0].accuracy*100).toFixed(2)} `
-                );
+                if( this.asl2enPredictedGlosses().length > 7 ){
+                  this.asl2enPredictedGlosses.update(arr=>arr.slice(0,6))
+                }
+                this.asl2enPredictedGlosses.update(arr=>[...arr, `${this.asl2enWsPrediction().prediction[0].gloss}--${(this.asl2enWsPrediction().prediction[0].accuracy*100).toFixed(2)}`])
                 console.log(this.asl2enPredictedGlosses());
               }
+              this.asl2enWsError.set({
+                details: undefined,
+                detail: undefined
+              });
             }else if( (msg as ErrorDetail)?.details ){
               this.asl2enWsError.set(msg as ErrorDetail);
             }
