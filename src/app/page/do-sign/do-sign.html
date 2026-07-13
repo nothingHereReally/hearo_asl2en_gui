@@ -13,7 +13,7 @@
   ">
     @if( hasAllowedCamera() ){
         @if(asl2enWsPrediction().prediction.length!=0){
-            <div class="flex-column">
+            <div class="flex-column gap-pad100-xl">
                 <div class="
                 background-color-pc1-900
                 flex-column
@@ -37,7 +37,12 @@
                 ">sentence: {{ asl2enPredictedGlosses().join(' ') }}</div>
             </div>
         }
-        <div class="video-camera-container">
+        <div class="
+        video-camera-container
+        flex-column
+        flex-align-center
+        gap-pad100-xl
+        ">
           <div class="font-color-fail font-bold-regular">{{ asl2enWsError().details }}</div>
           <video
               #videoEl
