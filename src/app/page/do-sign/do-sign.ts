@@ -5,6 +5,8 @@ import { environment as env } from '../../../environment/environment';
 import { sleepAsync } from '../../tools';
 import { Asl2enService } from '../../service/asl2en-service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ErrorDetail } from '../../model/errors-model';
+import { Asl2EnModel } from '../../model/asl2en-model';
 
 
 @Component({
@@ -19,6 +21,10 @@ export class DoSign implements AfterViewInit, OnDestroy{
   /* TODO: use asl2en websocket version to do recognize sign done by human being */
   private keepVideoCameraRolling: WritableSignal<boolean>= signal(true);
   protected hasAllowedCamera: WritableSignal<boolean>= signal(false);
+  protected asl2enWsMessage: WritableSignal<Asl2EnModel|ErrorDetail>= signal({
+    detail: undefined,
+    details: undefined
+  });
 
 
   readonly videoElRef: Signal<ElementRef<HTMLVideoElement>>= viewChild.required<ElementRef<HTMLVideoElement>>('videoEl');
@@ -56,17 +62,23 @@ export class DoSign implements AfterViewInit, OnDestroy{
       }
       this.asl2enService.wsAsl2enMessage$
           .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe(msg=>{
-            console.log(msg);
+          .subscribe((msg: Asl2EnModel|ErrorDetail)=>{
+            this.asl2enWsMessage.set(msg);
+            if( (this.asl2enWsMessage() as Asl2EnModel)?.prediction ){
+              console.log(`-------------------------------------------------`);
+              (this.asl2enWsMessage() as Asl2EnModel).prediction.forEach((el, idx)=>{
+                console.log(`${idx} -- ${el.gloss} -- ${el.accuracy}`);
+              })
+            }
           });
       /* loop to get images for asl2en */
       sleepAsync(1000*24, ()=>{
         this.__stopVideoCamera();
       });
-      // while( this.keepVideoCameraRolling() && this.hasAllowedCamera() ){
-      //   await sleepAsync(env.TIME_DELAY_ASL2EN);
-      //   await this.__doAsl2en();
-      // }
+      while( this.keepVideoCameraRolling() && this.hasAllowedCamera() ){
+        await sleepAsync(env.TIME_DELAY_ASL2EN);
+        await this.__doAsl2en();
+      }
     }catch(err){
       /* denied camera access permission by user */
       this.hasAllowedCamera.set(false);
@@ -92,8 +104,7 @@ export class DoSign implements AfterViewInit, OnDestroy{
         this.imgCanvas().nativeElement.toBlob(resolve, 'image/jpeg', 0.98)
       );
       if( imageBlob!=null ){
-        const sendImage: string= await this.asl2enService.asl2en2ws(imageBlob)
-        console.log(`image sent msg: ${sendImage}`);
+        await this.asl2enService.asl2en2ws(imageBlob)
       }
     }
   }
