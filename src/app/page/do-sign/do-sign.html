@@ -14,12 +14,27 @@
     @if( hasAllowedCamera() ){
         @if(asl2enWsPrediction().prediction.length!=0){
             <div class="flex-column">
+                <div class="
+                background-color-pc1-900
+                flex-column
+                gap-pad100-xs
+                padding-left-right-pad100-md
+                padding-top-bottom-pad100-md
+                font-color-pc1-300
+                border-radius
+                ">
                 @for(el of asl2enWsPrediction().prediction; track el.gloss){
-                    <div>
-                      <span>{{ el.gloss }} : {{ el.accuracy*100 }}%</span>
-                    </div>
+                    <div>{{ el.gloss }} {{ (el.accuracy*100).toFixed(2) }}%</div>
                 }
-                <div>sentence: {{ asl2enPredictedGlosses() }}</div>
+                </div>
+                <div class="
+                text-wrap-391px-max-width
+                padding-left-right-pad100-md
+                padding-top-bottom-pad100-md
+                background-color-tc1-900
+                font-color-success
+                border-radius
+                ">sentence: {{ asl2enPredictedGlosses() }}</div>
             </div>
         }
         <div class="video-camera-container">

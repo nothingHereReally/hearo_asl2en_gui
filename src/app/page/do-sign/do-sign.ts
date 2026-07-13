@@ -71,7 +71,7 @@ export class DoSign implements AfterViewInit, OnDestroy{
               this.asl2enWsPrediction.set(msg as Asl2EnModel);
               if( this.asl2enWsPrediction().prediction[0].accuracy > 0.7 ){
                 this.asl2enPredictedGlosses.set(
-                  `${this.asl2enPredictedGlosses()}${this.asl2enWsPrediction().prediction[0].gloss}--${Number(this.asl2enWsPrediction().prediction[0].accuracy.toFixed(5))*100}  🚀`
+                  `${this.asl2enPredictedGlosses()}${this.asl2enWsPrediction().prediction[0].gloss}--${(this.asl2enWsPrediction().prediction[0].accuracy*100).toFixed(2)} `
                 );
                 console.log(this.asl2enPredictedGlosses());
               }
@@ -80,7 +80,7 @@ export class DoSign implements AfterViewInit, OnDestroy{
             }
           });
       /* loop to get images for asl2en */
-      sleepAsync(1000*24, ()=>{
+      sleepAsync(1000*18, ()=>{
         this.__stopVideoCamera();
       });
       while( this.keepVideoCameraRolling() && this.hasAllowedCamera() ){
