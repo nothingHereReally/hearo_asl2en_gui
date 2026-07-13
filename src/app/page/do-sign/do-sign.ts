@@ -18,13 +18,17 @@ import { Asl2EnModel } from '../../model/asl2en-model';
 export class DoSign implements AfterViewInit, OnDestroy{
   private destroyRef: DestroyRef= inject(DestroyRef)
   private asl2enService: Asl2enService= inject(Asl2enService);
-  /* TODO: use asl2en websocket version to do recognize sign done by human being */
   private keepVideoCameraRolling: WritableSignal<boolean>= signal(true);
   protected hasAllowedCamera: WritableSignal<boolean>= signal(false);
-  protected asl2enWsMessage: WritableSignal<Asl2EnModel|ErrorDetail>= signal({
+  protected asl2enWsPrediction: WritableSignal<Asl2EnModel>= signal({
+    prediction: [],
+    asl2gloss_model: -1
+  })
+  protected asl2enWsError: WritableSignal<ErrorDetail>= signal({
     detail: undefined,
     details: undefined
   });
+  protected asl2enPredictedGlosses: WritableSignal<string>= signal('');
 
 
   readonly videoElRef: Signal<ElementRef<HTMLVideoElement>>= viewChild.required<ElementRef<HTMLVideoElement>>('videoEl');
@@ -63,12 +67,15 @@ export class DoSign implements AfterViewInit, OnDestroy{
       this.asl2enService.wsAsl2enMessage$
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe((msg: Asl2EnModel|ErrorDetail)=>{
-            this.asl2enWsMessage.set(msg);
-            if( (this.asl2enWsMessage() as Asl2EnModel)?.prediction ){
-              console.log(`-------------------------------------------------`);
-              (this.asl2enWsMessage() as Asl2EnModel).prediction.forEach((el, idx)=>{
-                console.log(`${idx} -- ${el.gloss} -- ${el.accuracy}`);
-              })
+            if( (msg as Asl2EnModel)?.prediction ){
+              this.asl2enWsPrediction.set(msg as Asl2EnModel);
+              if( this.asl2enWsPrediction().prediction[0].accuracy > 0.7 ){
+                this.asl2enPredictedGlosses.set(
+                  `${this.asl2enPredictedGlosses()}${this.asl2enWsPrediction().prediction[0].gloss}--${Number(this.asl2enWsPrediction().prediction[0].accuracy.toFixed(5))*100}  🚀`
+                );
+              }
+            }else if( (msg as ErrorDetail)?.details ){
+              this.asl2enWsError.set(msg as ErrorDetail);
             }
           });
       /* loop to get images for asl2en */
