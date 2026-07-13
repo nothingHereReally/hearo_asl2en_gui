@@ -13,17 +13,17 @@
   ">
     @if( hasAllowedCamera() ){
         @if(asl2enWsPrediction().prediction.length!=0){
-        <div class="flex-column">
-        @for(el of asl2enWsPrediction().prediction; track el.gloss){
-            <div>
-              <span>{{ el.gloss }} -- accuracy: {{ el.accuracy*100 }}</span>
+            <div class="flex-column">
+                @for(el of asl2enWsPrediction().prediction; track el.gloss){
+                    <div>
+                      <span>{{ el.gloss }} : {{ el.accuracy*100 }}%</span>
+                    </div>
+                }
+                <div>sentence: {{ asl2enPredictedGlosses() }}</div>
             </div>
         }
-        <div>gloss: {{ asl2enPredictedGlosses() }}</div>
-        <div>warnings: {{ asl2enWsError().details }}</div>
-        </div>
-        }
         <div class="video-camera-container">
+          <div class="font-color-fail font-bold-regular">{{ asl2enWsError().details }}</div>
           <video
               #videoEl
               class="
