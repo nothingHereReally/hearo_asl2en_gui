@@ -5,7 +5,7 @@ import { environment as env } from '../../../environment/environment';
 import { sleepAsync } from '../../tools';
 import { Asl2enService } from '../../service/asl2en-service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ErrorDetail } from '../../model/errors-model';
+import { Asl2EnErrorDetail } from '../../model/errors-model';
 import { Asl2EnModel } from '../../model/asl2en-model';
 
 
@@ -24,8 +24,7 @@ export class DoSign implements AfterViewInit, OnDestroy{
     prediction: [],
     asl2gloss_model: -1
   })
-  protected asl2enWsError: WritableSignal<ErrorDetail>= signal({
-    detail: undefined,
+  protected asl2enWsError: WritableSignal<Asl2EnErrorDetail>= signal({
     details: undefined
   });
   protected asl2enPredictedGlosses: WritableSignal<Array<string>>= signal([]);
@@ -66,7 +65,7 @@ export class DoSign implements AfterViewInit, OnDestroy{
       }
       this.asl2enService.wsAsl2enMessage$
           .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe((msg: Asl2EnModel|ErrorDetail)=>{
+          .subscribe((msg: Asl2EnModel|Asl2EnErrorDetail)=>{
             if( (msg as Asl2EnModel)?.prediction ){
               this.asl2enWsPrediction.set(msg as Asl2EnModel);
               if( this.asl2enWsPrediction().prediction[0].accuracy > 0.7 ){
@@ -78,10 +77,9 @@ export class DoSign implements AfterViewInit, OnDestroy{
               }
               this.asl2enWsError.set({
                 details: undefined,
-                detail: undefined
               });
-            }else if( (msg as ErrorDetail)?.details ){
-              this.asl2enWsError.set(msg as ErrorDetail);
+            }else if( (msg as Asl2EnErrorDetail)?.details ){
+              this.asl2enWsError.set(msg as Asl2EnErrorDetail);
             }
           });
       /* loop to get images for asl2en */

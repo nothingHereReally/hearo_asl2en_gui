@@ -1,4 +1,3 @@
-export interface ErrorDetail{
-  detail: string|Array<string>|undefined;
-  details: string|Array<string>|undefined;
+export interface Asl2EnErrorDetail{
+  details: string|undefined;
 }

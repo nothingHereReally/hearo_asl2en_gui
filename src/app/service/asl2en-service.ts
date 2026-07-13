@@ -7,7 +7,7 @@ import { firstValueFrom, Observable, Subject } from 'rxjs';
 
 import { environment as env } from '../../environment/environment';
 import { Asl2EnImageModel, Asl2EnModel } from '../model/asl2en-model';
-import { ErrorDetail } from '../model/errors-model';
+import { Asl2EnErrorDetail } from '../model/errors-model';
 
 
 @Injectable({
@@ -17,7 +17,7 @@ export class Asl2enService{
   private readonly api_prefix: string= '/api/v1';
   private readonly http: HttpClient= inject(HttpClient);
   private wsAsl2en: WebSocket|undefined= undefined;
-  public readonly wsAsl2enMessage$: Subject<Asl2EnModel|ErrorDetail>= new Subject<Asl2EnModel|ErrorDetail>();
+  public readonly wsAsl2enMessage$: Subject<Asl2EnModel|Asl2EnErrorDetail>= new Subject<Asl2EnModel|Asl2EnErrorDetail>();
   private asl2enWsHttpPostUuid: string= "init";
 
 
