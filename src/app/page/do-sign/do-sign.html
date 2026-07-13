@@ -7,11 +7,26 @@
 
   <div class="
   flex-row
+  flex-wrap-row
   gap-pad100-md
   flex-justify-center
   flex-align-center
   ">
     @if( hasAllowedCamera() ){
+        <div class="
+        flex-column
+        flex-align-center
+        gap-pad100-xl
+        ">
+          <div class="font-color-fail font-bold-regular">{{ asl2enWsError().details }}</div>
+          <video
+              #videoEl
+              class="
+              video-camera-reponsive
+              border-radius
+              ">
+          </video>
+        </div>
         @if(asl2enWsPrediction().prediction.length!=0){
             <div class="flex-column gap-pad100-xl">
                 <div class="
@@ -37,20 +52,6 @@
                 ">sentence: {{ asl2enPredictedGlosses().join(' ') }}</div>
             </div>
         }
-        <div class="
-        flex-column
-        flex-align-center
-        gap-pad100-xl
-        ">
-          <div class="font-color-fail font-bold-regular">{{ asl2enWsError().details }}</div>
-          <video
-              #videoEl
-              class="
-              video-camera-reponsive
-              border-radius
-              ">
-          </video>
-        </div>
     }@else{
         <div class="
         flex-row
