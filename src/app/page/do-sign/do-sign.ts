@@ -72,7 +72,11 @@ export class DoSign implements AfterViewInit, OnDestroy{
                 if( this.asl2enPredictedGlosses().length > 7 ){
                   this.asl2enPredictedGlosses.update(arr=>arr.slice(0,6))
                 }
-                this.asl2enPredictedGlosses.update(arr=>[...arr, `${this.asl2enWsPrediction().prediction[0].gloss}--${(this.asl2enWsPrediction().prediction[0].accuracy*100).toFixed(2)}`])
+                const top1gloss= this.asl2enWsPrediction().prediction[0]
+                this.asl2enPredictedGlosses.update(arr=>[
+                  ...arr,
+                  `${top1gloss.gloss}( ${(top1gloss.accuracy*100).toFixed(2)} )`
+                ]);
               }
               this.asl2enWsError.set({
                 details: undefined,
