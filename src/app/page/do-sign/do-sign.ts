@@ -68,7 +68,7 @@ export class DoSign implements AfterViewInit, OnDestroy{
           .subscribe((msg: Asl2EnModel|Asl2EnErrorDetail)=>{
             if( (msg as Asl2EnModel)?.prediction ){
               this.asl2enWsPrediction.set(msg as Asl2EnModel);
-              if( this.asl2enWsPrediction().prediction[0].accuracy > 0.7 ){
+              if( this.asl2enWsPrediction().prediction[0].accuracy > 0.75 ){
                 if( this.asl2enPredictedGlosses().length > 7 ){
                   this.asl2enPredictedGlosses.update(arr=>arr.slice(0,6))
                 }
