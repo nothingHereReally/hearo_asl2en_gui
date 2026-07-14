@@ -8,6 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Asl2EnErrorDetail } from '../../model/errors-model';
 import { Asl2EnModel } from '../../model/asl2en-model';
 import { ClerkPatientMessage } from '../../service/clerk-patient-message';
+import { ClerkPatientWsMsgModel, InitWsMessageModel } from '../../model/clerk-patient-msg-model';
 
 
 @Component({
@@ -30,6 +31,8 @@ export class DoSign implements AfterViewInit, OnDestroy{
     details: undefined
   });
   protected asl2enPredictedGlosses: WritableSignal<Array<string>>= signal([]);
+  protected clerkPatientMsgReceivedSent: WritableSignal<Array<ClerkPatientWsMsgModel>>= signal([]);
+  protected patientIs: WritableSignal<string>= signal('');
 
 
   readonly videoElRef: Signal<ElementRef<HTMLVideoElement>>= viewChild.required<ElementRef<HTMLVideoElement>>('videoEl');
@@ -65,6 +68,15 @@ export class DoSign implements AfterViewInit, OnDestroy{
       this.videoElRef().nativeElement.onloadedmetadata= ()=>{
           this.videoElRef().nativeElement.play();
       }
+      this.clerkPatientMsgService.message$
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe((msg: InitWsMessageModel|ClerkPatientWsMsgModel)=>{
+            if( (msg as InitWsMessageModel).you_are ){
+              this.patientIs.set((msg as InitWsMessageModel).you_are);
+            }else{
+              this.clerkPatientMsgReceivedSent.update(arr=>[...arr, msg as ClerkPatientWsMsgModel]);
+            }
+          });
       this.asl2enService.wsAsl2enMessage$
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe((msg: Asl2EnModel|Asl2EnErrorDetail)=>{
