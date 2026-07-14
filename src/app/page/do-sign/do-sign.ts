@@ -7,6 +7,7 @@ import { Asl2enService } from '../../service/asl2en-service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Asl2EnErrorDetail } from '../../model/errors-model';
 import { Asl2EnModel } from '../../model/asl2en-model';
+import { ClerkPatientMessage } from '../../service/clerk-patient-message';
 
 
 @Component({
@@ -18,6 +19,7 @@ import { Asl2EnModel } from '../../model/asl2en-model';
 export class DoSign implements AfterViewInit, OnDestroy{
   private destroyRef: DestroyRef= inject(DestroyRef)
   private asl2enService: Asl2enService= inject(Asl2enService);
+  private clerkPatientMsgService: ClerkPatientMessage= inject(ClerkPatientMessage);
   private keepVideoCameraRolling: WritableSignal<boolean>= signal(true);
   protected hasAllowedCamera: WritableSignal<boolean>= signal(false);
   protected asl2enWsPrediction: WritableSignal<Asl2EnModel>= signal({
@@ -83,6 +85,9 @@ export class DoSign implements AfterViewInit, OnDestroy{
               });
             }else if( (msg as Asl2EnErrorDetail)?.details ){
               this.asl2enWsError.set(msg as Asl2EnErrorDetail);
+              if( this.asl2enPredictedGlosses().length>0 ){
+                this.clerkPatientMsgService.sendMsg(this.asl2enPredictedGlosses().join(' '));
+              }
             }
           });
       /* loop to get images for asl2en */
