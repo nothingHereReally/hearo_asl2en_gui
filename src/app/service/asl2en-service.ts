@@ -5,16 +5,16 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 
 
-import { environment as env } from '../../environment/environment';
 import { Asl2EnImageModel, Asl2EnModel } from '../model/asl2en-model';
 import { Asl2EnErrorDetail } from '../model/errors-model';
+import { environment as env } from '../../environment/environment';
+import { API_PREFIX } from '../tools';
 
 
 @Injectable({
   providedIn: 'root',
 })
 export class Asl2enService{
-  private readonly api_prefix: string= '/api/v1';
   private readonly http: HttpClient= inject(HttpClient);
   private wsAsl2en: WebSocket|undefined= undefined;
   public readonly wsAsl2enMessage$: Subject<Asl2EnModel|Asl2EnErrorDetail>= new Subject<Asl2EnModel|Asl2EnErrorDetail>();
@@ -31,7 +31,7 @@ export class Asl2enService{
     });
 
     return this.http.post<Asl2EnModel>(
-      `${env.API_DOMAIN.http}${this.api_prefix}/asl2en/`,
+      `${env.API_DOMAIN.http}${API_PREFIX}/asl2en/`,
       formData,
       {
         observe: 'body'
@@ -46,11 +46,11 @@ export class Asl2enService{
     }
 
     return new Promise((resolve, reject)=> {
-      this.wsAsl2en= new WebSocket(`${env.API_DOMAIN.ws}${this.api_prefix}/asl2en/${this.asl2enWsHttpPostUuid}/`);
+      this.wsAsl2en= new WebSocket(`${env.API_DOMAIN.ws}${API_PREFIX}/asl2en/${this.asl2enWsHttpPostUuid}/`);
       this.wsAsl2en.onopen= ()=>{ resolve(); };
 
       this.wsAsl2en.onerror= ()=>{ reject(
-        new Error(`Failed to connect to WebSocket ${env.API_DOMAIN.ws}${this.api_prefix}/asl2en/${this.asl2enWsHttpPostUuid}/`)
+        new Error(`Failed to connect to WebSocket ${env.API_DOMAIN.ws}${API_PREFIX}/asl2en/${this.asl2enWsHttpPostUuid}/`)
       ); };
 
       this.wsAsl2en.onmessage= (event)=>{
@@ -71,14 +71,14 @@ export class Asl2enService{
     formData.append('image', image, 'image.jpeg');
     try{
       asl2en= await firstValueFrom(this.http.post<Asl2EnImageModel>(
-        `${env.API_DOMAIN.http}${this.api_prefix}/asl2en/${this.asl2enWsHttpPostUuid}/`,
+        `${env.API_DOMAIN.http}${API_PREFIX}/asl2en/${this.asl2enWsHttpPostUuid}/`,
         formData,
         { observe: 'body' }
       ));
     }catch(err){
       this.asl2enWsHttpPostUuid= 'init';
       asl2en= await firstValueFrom(this.http.post<Asl2EnImageModel>(
-        `${env.API_DOMAIN.http}${this.api_prefix}/asl2en/${this.asl2enWsHttpPostUuid}/`,
+        `${env.API_DOMAIN.http}${API_PREFIX}/asl2en/${this.asl2enWsHttpPostUuid}/`,
         formData,
         { observe: 'body' }
       ));
