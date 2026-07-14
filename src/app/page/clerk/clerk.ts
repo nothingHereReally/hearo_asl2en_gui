@@ -1,9 +1,12 @@
-import { Component, signal, WritableSignal } from '@angular/core';
+import { Component, model, ModelSignal, signal, WritableSignal } from '@angular/core';
 import { ClerkPatientWsMsgModel } from '../../model/clerk-patient-msg-model';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-clerk',
-  imports: [],
+  imports: [
+    FormsModule
+  ],
   templateUrl: './clerk.html',
   styleUrl: './clerk.css',
 })
@@ -23,4 +26,21 @@ export class Clerk{
     },
   ]);
   protected clerkIs: WritableSignal<string>= signal('user_a');
+  protected clerkInputMsg: ModelSignal<string>= model('');
+
+
+  protected async sendMessage(key?: KeyboardEvent): Promise<void>{
+    if( key?.key=="Enter" && !key.shiftKey){
+      key.preventDefault();
+      if( this.clerkInputMsg().length!=0 ){
+        this.clerkInputMsg.set('');
+      }
+    }else{
+      console.log(`blah no key send`);
+    }
+  }
+  protected autoGrowHeightMsg(textarea: HTMLTextAreaElement) {
+    textarea.style.height= 'auto';
+    textarea.style.height= textarea.scrollHeight +'px';
+  }
 }
