@@ -44,4 +44,25 @@
       }
     </div>
   </div>
+  <div class="
+    flex-row
+    flex-justify-center
+    ">
+      <textarea
+          #inputMsg
+          (input)="autoGrowHeightMsg(inputMsg)"
+          class="
+          background-color-pc3-800
+          border-radius
+          clerk-input-msg
+          padding-left-right-pad100-lg
+          padding-top-bottom-pad100-lg
+          "
+          name="clerk_message_in"
+          placeholder="Your message"
+          rows="1"
+          [(ngModel)]="clerkInputMsg"
+          (keydown)="sendMessage($event)">
+      </textarea>
+  </div>
 </div>
