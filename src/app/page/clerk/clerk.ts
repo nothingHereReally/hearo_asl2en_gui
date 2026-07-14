@@ -1,11 +1,13 @@
 import { Component, model, ModelSignal, signal, WritableSignal } from '@angular/core';
 import { ClerkPatientWsMsgModel } from '../../model/clerk-patient-msg-model';
 import { FormsModule } from '@angular/forms';
+import { Button } from '../../essential/button/button';
 
 @Component({
   selector: 'app-clerk',
   imports: [
-    FormsModule
+    FormsModule,
+    Button
   ],
   templateUrl: './clerk.html',
   styleUrl: './clerk.css',
@@ -35,8 +37,10 @@ export class Clerk{
       if( this.clerkInputMsg().length!=0 ){
         this.clerkInputMsg.set('');
       }
-    }else{
-      console.log(`blah no key send`);
+    }else if( key==undefined ){
+      if( this.clerkInputMsg().length!=0 ){
+        this.clerkInputMsg.set('');
+      }
     }
   }
   protected autoGrowHeightMsg(textarea: HTMLTextAreaElement) {

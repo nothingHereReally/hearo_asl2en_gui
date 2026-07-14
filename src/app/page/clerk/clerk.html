@@ -64,5 +64,12 @@
           [(ngModel)]="clerkInputMsg"
           (keydown)="sendMessage($event)">
       </textarea>
+        <app-button
+            [btnText]="'Send'"
+            [styleButton]="'style-outline'"
+            [isUnderlined]="'not-underlined'"
+            (outOnClick)="sendMessage()"
+            [iconname]="''"
+            />
   </div>
 </div>
