@@ -101,6 +101,7 @@ export class DoSign implements AfterViewInit, OnDestroy{
                 this.clerkPatientMsgService.sendMsg(
                   this.asl2enPredictedGlosses().join(' ').replace(/\(.*\)/g, "")
                 );
+                this.asl2enPredictedGlosses.set([]);
               }
             }
           });
