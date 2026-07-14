@@ -52,6 +52,32 @@
                 ">sentence: {{ asl2enPredictedGlosses().join(' ') }}</div>
             </div>
         }
+        @if( clerkPatientMsgReceivedSent().length!=0 ){
+            <div class="
+            text-wrap-391px-max-width
+            padding-left-right-pad100-md
+            padding-top-bottom-pad100-md
+            background-color-tc1-900
+            font-color-success
+            border-radius
+            ">
+            @for(el of clerkPatientMsgReceivedSent(); track el.user_a){
+                @if( el.user_a!=undefined ){
+                    <div>
+                    @if( patientIs()=="user_a" ){<span>Patient:</span>}
+                    @else{<span>Clerk:</span>}
+                    {{ el.user_a }}
+                    </div>
+                }@else{
+                    <div>
+                    @if( patientIs()=="user_b" ){<span>Patient:</span>}
+                    @else{<span>Clerk:</span>}
+                    {{ el.user_b }}
+                    </div>
+                }
+            }
+            </div>
+        }
     }@else{
         <div class="
         flex-row
