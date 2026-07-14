@@ -98,7 +98,9 @@ export class DoSign implements AfterViewInit, OnDestroy{
             }else if( (msg as Asl2EnErrorDetail)?.details ){
               this.asl2enWsError.set(msg as Asl2EnErrorDetail);
               if( this.asl2enPredictedGlosses().length>0 ){
-                this.clerkPatientMsgService.sendMsg(this.asl2enPredictedGlosses().join(' '));
+                this.clerkPatientMsgService.sendMsg(
+                  this.asl2enPredictedGlosses().join(' ').replace(/\(.*\)/g, "")
+                );
               }
             }
           });
