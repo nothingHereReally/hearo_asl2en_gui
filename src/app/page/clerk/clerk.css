@@ -1,0 +1,4 @@
+.message-width{
+  width: 100%;
+  max-width: min(95vw, 800px);
+}
