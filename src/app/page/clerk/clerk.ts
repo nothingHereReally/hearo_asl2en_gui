@@ -1,7 +1,9 @@
-import { Component, model, ModelSignal, signal, WritableSignal } from '@angular/core';
-import { ClerkPatientWsMsgModel } from '../../model/clerk-patient-msg-model';
+import { Component, DestroyRef, inject, model, ModelSignal, OnInit, signal, WritableSignal } from '@angular/core';
+import { ClerkPatientWsMsgModel, InitWsMessageModel } from '../../model/clerk-patient-msg-model';
 import { FormsModule } from '@angular/forms';
 import { Button } from '../../essential/button/button';
+import { ClerkPatientMessage } from '../../service/clerk-patient-message';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-clerk',
@@ -12,33 +14,35 @@ import { Button } from '../../essential/button/button';
   templateUrl: './clerk.html',
   styleUrl: './clerk.css',
 })
-export class Clerk{
-  protected clerkPatientMsgReceivedSent: WritableSignal<Array<ClerkPatientWsMsgModel>>= signal([
-    {
-      user_a: 'hello this is user_a',
-      user_b: undefined
-    },
-    {
-      user_a: undefined,
-      user_b: 'hello this is user_b 2nd'
-    },
-    {
-      user_a: 'hello this is user_a 3rd',
-      user_b: undefined
-    },
-  ]);
-  protected clerkIs: WritableSignal<string>= signal('user_a');
+export class Clerk implements OnInit{
+  private destroyRef: DestroyRef= inject(DestroyRef)
+  private clerkPatientMsgService: ClerkPatientMessage= inject(ClerkPatientMessage);
+  protected clerkPatientMsgReceivedSent: WritableSignal<Array<ClerkPatientWsMsgModel>>= signal([]);
+  protected clerkIs: WritableSignal<string>= signal('');
   protected clerkInputMsg: ModelSignal<string>= model('');
 
 
+  public ngOnInit(): void {
+    this.clerkPatientMsgService.message$.pipe()
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe((msg: InitWsMessageModel|ClerkPatientWsMsgModel)=>{
+            if( (msg as InitWsMessageModel).you_are ){
+              this.clerkIs.set((msg as InitWsMessageModel).you_are);
+            }else{
+              this.clerkPatientMsgReceivedSent.update(arr=>[...arr, msg as ClerkPatientWsMsgModel]);
+            }
+          });
+  }
   protected async sendMessage(key?: KeyboardEvent): Promise<void>{
     if( key?.key=="Enter" && !key.shiftKey){
       key.preventDefault();
       if( this.clerkInputMsg().length!=0 ){
+        this.clerkPatientMsgService.sendMsg(this.clerkInputMsg());
         this.clerkInputMsg.set('');
       }
     }else if( key==undefined ){
       if( this.clerkInputMsg().length!=0 ){
+        this.clerkPatientMsgService.sendMsg(this.clerkInputMsg());
         this.clerkInputMsg.set('');
       }
     }
