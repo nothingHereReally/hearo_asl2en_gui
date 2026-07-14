@@ -9,7 +9,7 @@
       class="
       flex-column
       gap-pad200-xs
-      message-width
+      message-width-container
       padding-left-right-pad100-md
       padding-top-bottom-pad100-md
       background-color-tc1-900
@@ -19,18 +19,26 @@
       [hidden]="clerkPatientMsgReceivedSent().length==0">
       @for(el of clerkPatientMsgReceivedSent(); track $index){
           @if( el.user_a!=undefined ){
-              <div class="flex-row"
-                [class.flex-justify-end]="clerkIs()=='user_a'">
-              @if( clerkIs()=='user_a' ){ <span>Clerk: </span> }
-              @else{ <span>Patient: </span> }
-              <span> {{ el.user_a }}</span>
+              <div class="width-100">
+                <div class="flex-row"
+                  [class.flex-justify-end]="clerkIs()=='user_a'">
+                  <div class="a-message-width">
+                    @if( clerkIs()=='user_a' ){ <span>Clerk: </span> }
+                    @else{ <span>Patient: </span> }
+                    <span> {{ el.user_a }}</span>
+                  </div>
+                </div>
               </div>
           }@else{
-              <div class="flex-row"
-                [class.flex-justify-end]="clerkIs()=='user_b'">
-              @if( clerkIs()=='user_b' ){ <span>Clerk: </span> }
-              @else{ <span>Patient: </span> }
-              <span> {{ el.user_b }}</span>
+              <div class="width-100">
+                <div class="flex-row"
+                  [class.flex-justify-end]="clerkIs()=='user_b'">
+                  <div class="a-message-width">
+                    @if( clerkIs()=='user_b' ){ <span>Clerk: </span> }
+                    @else{ <span>Patient: </span> }
+                    <span> {{ el.user_b }}</span>
+                  </div>
+                </div>
               </div>
           }
       }
