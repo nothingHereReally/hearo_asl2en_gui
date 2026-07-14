@@ -5,35 +5,35 @@
   padding-top-bottom-pad100-lg
   " src="/logo/hearo_logo.svg" alt="logo icon">
   <div class="flex-center-horizontal">
-  <div
-    class="
-    flex-column
-    gap-pad200-xs
-    message-width
-    padding-left-right-pad100-md
-    padding-top-bottom-pad100-md
-    background-color-tc1-900
-    font-color-success
-    border-radius
-    "
-    [hidden]="clerkPatientMsgReceivedSent().length==0">
-    @for(el of clerkPatientMsgReceivedSent(); track $index){
-        @if( el.user_a!=undefined ){
-            <div class="flex-row"
-              [class.flex-justify-end]="clerkIs()=='user_a'">
-            @if( clerkIs()=='user_a' ){ <span>Clerk: </span> }
-            @else{ <span>Patient: </span> }
-            <span> {{ el.user_a }}</span>
-            </div>
-        }@else{
-            <div class="flex-row"
-              [class.flex-justify-end]="clerkIs()=='user_b'">
-            @if( clerkIs()=='user_b' ){ <span>Clerk: </span> }
-            @else{ <span>Patient: </span> }
-            <span> {{ el.user_b }}</span>
-            </div>
-        }
-    }
-  </div>
+    <div
+      class="
+      flex-column
+      gap-pad200-xs
+      message-width
+      padding-left-right-pad100-md
+      padding-top-bottom-pad100-md
+      background-color-tc1-900
+      font-color-success
+      border-radius
+      "
+      [hidden]="clerkPatientMsgReceivedSent().length==0">
+      @for(el of clerkPatientMsgReceivedSent(); track $index){
+          @if( el.user_a!=undefined ){
+              <div class="flex-row"
+                [class.flex-justify-end]="clerkIs()=='user_a'">
+              @if( clerkIs()=='user_a' ){ <span>Clerk: </span> }
+              @else{ <span>Patient: </span> }
+              <span> {{ el.user_a }}</span>
+              </div>
+          }@else{
+              <div class="flex-row"
+                [class.flex-justify-end]="clerkIs()=='user_b'">
+              @if( clerkIs()=='user_b' ){ <span>Clerk: </span> }
+              @else{ <span>Patient: </span> }
+              <span> {{ el.user_b }}</span>
+              </div>
+          }
+      }
+    </div>
   </div>
 </div>
