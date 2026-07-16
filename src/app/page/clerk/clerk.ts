@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Button } from '../../essential/button/button';
 import { ClerkPatientMessage } from '../../service/clerk-patient-message';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { INIT_WS_MSG_CP } from '../../tools';
 
 @Component({
   selector: 'app-clerk',
@@ -28,10 +29,14 @@ export class Clerk implements OnInit{
           .subscribe((msg: InitWsMessageModel|ClerkPatientWsMsgModel)=>{
             if( (msg as InitWsMessageModel).you_are ){
               this.clerkIs.set((msg as InitWsMessageModel).you_are);
-            }else{
+            }else if(
+                (msg as ClerkPatientWsMsgModel).user_a!=INIT_WS_MSG_CP &&
+                (msg as ClerkPatientWsMsgModel).user_b!=INIT_WS_MSG_CP){
               this.clerkPatientMsgReceivedSent.update(arr=>[...arr, msg as ClerkPatientWsMsgModel]);
             }
           });
+    this.clerkInputMsg.set(INIT_WS_MSG_CP);
+    this.sendMessage();
   }
   protected async sendMessage(key?: KeyboardEvent): Promise<void>{
     if( key?.key=="Enter" && !key.shiftKey){

@@ -2,7 +2,7 @@ import { AfterViewInit, Component, DestroyRef, ElementRef, inject, OnDestroy, Si
 
 
 import { environment as env } from '../../../environment/environment';
-import { sleepAsync } from '../../tools';
+import { INIT_WS_MSG_CP, sleepAsync } from '../../tools';
 import { Asl2enService } from '../../service/asl2en-service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Asl2EnErrorDetail } from '../../model/errors-model';
@@ -73,10 +73,13 @@ export class DoSign implements AfterViewInit, OnDestroy{
           .subscribe((msg: InitWsMessageModel|ClerkPatientWsMsgModel)=>{
             if( (msg as InitWsMessageModel).you_are ){
               this.patientIs.set((msg as InitWsMessageModel).you_are);
-            }else{
+            }else if(
+                (msg as ClerkPatientWsMsgModel).user_a!=INIT_WS_MSG_CP &&
+                (msg as ClerkPatientWsMsgModel).user_b!=INIT_WS_MSG_CP){
               this.clerkPatientMsgReceivedSent.update(arr=>[...arr, msg as ClerkPatientWsMsgModel]);
             }
           });
+      await this.clerkPatientMsgService.sendMsg(INIT_WS_MSG_CP);
       this.asl2enService.wsAsl2enMessage$
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe((msg: Asl2EnModel|Asl2EnErrorDetail)=>{
