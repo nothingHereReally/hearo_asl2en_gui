@@ -1,5 +1,13 @@
 import { Component, DestroyRef, inject, model, ModelSignal, OnInit, signal, WritableSignal } from '@angular/core';
-import { ClerkPatientWsMsgModel, InitWsMessageModel } from '../../model/clerk-patient-msg-model';
+import {
+    ClerkPatientMsgModel,
+    ConnectWsEasyMsg,
+    StrConnectWsEasyMsg,
+    StrWsEasyMsgUserA,
+    StrWsEasyMsgUserB,
+    WsEasyMsgUserA,
+    WsEasyMsgUserB
+} from '../../model/clerk-patient-msg-model';
 import { FormsModule } from '@angular/forms';
 import { Button } from '../../essential/button/button';
 import { ClerkPatientMessage } from '../../service/clerk-patient-message';
@@ -18,7 +26,7 @@ import { INIT_WS_MSG_CP } from '../../tools';
 export class Clerk implements OnInit{
   private destroyRef: DestroyRef= inject(DestroyRef)
   private clerkPatientMsgService: ClerkPatientMessage= inject(ClerkPatientMessage);
-  protected clerkPatientMsgReceivedSent: WritableSignal<Array<ClerkPatientWsMsgModel>>= signal([]);
+  protected clerkPatientMsgReceivedSent: WritableSignal<Array<ClerkPatientMsgModel>>= signal([]);
   protected clerkIs: WritableSignal<string>= signal('');
   protected clerkInputMsg: ModelSignal<string>= model('');
 
@@ -26,13 +34,25 @@ export class Clerk implements OnInit{
   public ngOnInit(): void {
     this.clerkPatientMsgService.message$.pipe()
           .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe((msg: InitWsMessageModel|ClerkPatientWsMsgModel)=>{
-            if( (msg as InitWsMessageModel).you_are ){
-              this.clerkIs.set((msg as InitWsMessageModel).you_are);
-            }else if(
-                (msg as ClerkPatientWsMsgModel).user_a!=INIT_WS_MSG_CP &&
-                (msg as ClerkPatientWsMsgModel).user_b!=INIT_WS_MSG_CP){
-              this.clerkPatientMsgReceivedSent.update(arr=>[...arr, msg as ClerkPatientWsMsgModel]);
+          .subscribe((msg: ConnectWsEasyMsg|WsEasyMsgUserA|WsEasyMsgUserB)=>{
+            if( msg.type==StrConnectWsEasyMsg ){
+              this.clerkIs.set((msg as ConnectWsEasyMsg).data.you_are);
+            }else if( msg.type==StrWsEasyMsgUserA ){
+              const msgFromUserA= (msg as WsEasyMsgUserA).data.user_a;
+              if( msgFromUserA!=INIT_WS_MSG_CP ){
+                this.clerkPatientMsgReceivedSent.update(arr=>[...arr, {
+                  'user_a': (msg as WsEasyMsgUserA).data.user_a,
+                  'user_b': undefined,
+                }]);
+              }
+            }else if( msg.type==StrWsEasyMsgUserB ){
+              const msgFromUserB= (msg as WsEasyMsgUserB).data.user_b;
+              if( msgFromUserB!=INIT_WS_MSG_CP ){
+                this.clerkPatientMsgReceivedSent.update(arr=>[...arr, {
+                  'user_a': undefined,
+                  'user_b': (msg as WsEasyMsgUserB).data.user_b,
+                }]);
+              }
             }
           });
     this.clerkInputMsg.set(INIT_WS_MSG_CP);

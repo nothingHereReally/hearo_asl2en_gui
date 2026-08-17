@@ -6,7 +6,12 @@ import { firstValueFrom, Subject } from 'rxjs';
 
 
 import { environment as env } from '../../environment/environment';
-import { ClerkPatientWsMsgModel, InitWsMessageModel, UuidInitMessageModel } from '../model/clerk-patient-msg-model';
+import {
+    ConnectWsEasyMsg,
+    UuidMessageModel,
+    WsEasyMsgUserA,
+    WsEasyMsgUserB
+} from '../model/clerk-patient-msg-model';
 import { API_PREFIX } from '../tools';
 
 
@@ -17,11 +22,11 @@ export class ClerkPatientMessage{
   private http: HttpClient= inject(HttpClient);
   private uuidMsg: string= 'init';
   private wsConnection: WebSocket|undefined= undefined;
-  public readonly message$: Subject<InitWsMessageModel|ClerkPatientWsMsgModel>= new Subject<InitWsMessageModel|ClerkPatientWsMsgModel>();
+  public readonly message$: Subject<ConnectWsEasyMsg|WsEasyMsgUserA|WsEasyMsgUserB>= new Subject<ConnectWsEasyMsg|WsEasyMsgUserA|WsEasyMsgUserB>();
 
 
   private async __getUuid(): Promise<string>{
-    const response: UuidInitMessageModel= await firstValueFrom(this.http.get<UuidInitMessageModel>(
+    const response: UuidMessageModel= await firstValueFrom(this.http.get<UuidMessageModel>(
       `${env.API_DOMAIN.http}${API_PREFIX}/easy-ws-message/`,
       {
         observe: 'body'

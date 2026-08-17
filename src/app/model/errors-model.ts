@@ -1,3 +1,7 @@
-export interface Asl2EnErrorDetail{
-  details: string|undefined;
+export const StrResponseWarning: string= 'ResponseWarning';
+export interface ResponseWarning{
+  type: 'ResponseWarning';
+  data: {
+    details: string|undefined;
+  };
 }
