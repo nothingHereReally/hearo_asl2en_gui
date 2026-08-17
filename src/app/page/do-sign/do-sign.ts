@@ -5,10 +5,10 @@ import { environment as env } from '../../../environment/environment';
 import { INIT_WS_MSG_CP, sleepAsync } from '../../tools';
 import { Asl2enService } from '../../service/asl2en-service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Asl2EnErrorDetail } from '../../model/errors-model';
-import { Asl2EnModel } from '../../model/asl2en-model';
+import { ResponseWarning, StrResponseWarning } from '../../model/errors-model';
+import { Asl2enPrediction, ConnectWs, ResponseAsl2enLandmark, ResponseAsl2enPrediction, StrResponseAsl2enPrediction } from '../../model/asl2en-model';
 import { ClerkPatientMessage } from '../../service/clerk-patient-message';
-import { ClerkPatientWsMsgModel, InitWsMessageModel } from '../../model/clerk-patient-msg-model';
+import { ClerkPatientMsgModel, ConnectWsEasyMsg, StrConnectWsEasyMsg, StrWsEasyMsgUserA, StrWsEasyMsgUserB, WsEasyMsgUserA, WsEasyMsgUserB } from '../../model/clerk-patient-msg-model';
 
 
 @Component({
@@ -23,15 +23,18 @@ export class DoSign implements AfterViewInit, OnDestroy{
   private clerkPatientMsgService: ClerkPatientMessage= inject(ClerkPatientMessage);
   private keepVideoCameraRolling: WritableSignal<boolean>= signal(true);
   protected hasAllowedCamera: WritableSignal<boolean>= signal(false);
-  protected asl2enWsPrediction: WritableSignal<Asl2EnModel>= signal({
+  protected asl2enWsPrediction: WritableSignal<Asl2enPrediction>= signal({
     prediction: [],
     asl2gloss_model: -1
   })
-  protected asl2enWsError: WritableSignal<Asl2EnErrorDetail>= signal({
-    details: undefined
+  protected asl2enWsError: WritableSignal<ResponseWarning>= signal({
+    type: 'ResponseWarning',
+    data: {
+      details: undefined
+    }
   });
   protected asl2enPredictedGlosses: WritableSignal<Array<string>>= signal([]);
-  protected clerkPatientMsgReceivedSent: WritableSignal<Array<ClerkPatientWsMsgModel>>= signal([]);
+  protected clerkPatientMsgReceivedSent: WritableSignal<Array<ClerkPatientMsgModel>>= signal([]);
   protected patientIs: WritableSignal<string>= signal('');
 
 
@@ -70,21 +73,33 @@ export class DoSign implements AfterViewInit, OnDestroy{
       }
       this.clerkPatientMsgService.message$
           .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe((msg: InitWsMessageModel|ClerkPatientWsMsgModel)=>{
-            if( (msg as InitWsMessageModel).you_are ){
-              this.patientIs.set((msg as InitWsMessageModel).you_are);
-            }else if(
-                (msg as ClerkPatientWsMsgModel).user_a!=INIT_WS_MSG_CP &&
-                (msg as ClerkPatientWsMsgModel).user_b!=INIT_WS_MSG_CP){
-              this.clerkPatientMsgReceivedSent.update(arr=>[...arr, msg as ClerkPatientWsMsgModel]);
+          .subscribe((msg: ConnectWsEasyMsg|WsEasyMsgUserA|WsEasyMsgUserB)=>{
+            if( msg.type==StrConnectWsEasyMsg ){
+              this.patientIs.set((msg as ConnectWsEasyMsg).data.you_are);
+            }else if( msg.type==StrWsEasyMsgUserA ){
+              const msgFromUserA: string= (msg as WsEasyMsgUserA).data.user_a;
+              if( msgFromUserA!=INIT_WS_MSG_CP ){
+                this.clerkPatientMsgReceivedSent.update(arr=>[...arr, {
+                  'user_a': msgFromUserA,
+                  'user_b': undefined,
+                }]);
+              }
+            }else if( msg.type==StrWsEasyMsgUserB ){
+              const msgFromUserB: string= (msg as WsEasyMsgUserB).data.user_b;
+              if( msgFromUserB!=INIT_WS_MSG_CP ){
+                this.clerkPatientMsgReceivedSent.update(arr=>[...arr, {
+                  'user_a': undefined,
+                  'user_b': msgFromUserB,
+                }]);
+              }
             }
           });
       await this.clerkPatientMsgService.sendMsg(INIT_WS_MSG_CP);
       this.asl2enService.wsAsl2enMessage$
           .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe((msg: Asl2EnModel|Asl2EnErrorDetail)=>{
-            if( (msg as Asl2EnModel)?.prediction ){
-              this.asl2enWsPrediction.set(msg as Asl2EnModel);
+          .subscribe((msg: ResponseAsl2enLandmark|ResponseAsl2enPrediction|ResponseWarning|ConnectWs)=>{
+            if( msg.type==StrResponseAsl2enPrediction ){
+              this.asl2enWsPrediction.set((msg as ResponseAsl2enPrediction).data)
               if( this.asl2enWsPrediction().prediction[0].accuracy > 0.75 ){
                 if( this.asl2enPredictedGlosses().length > 7 ){
                   this.asl2enPredictedGlosses.update(arr=>arr.slice(0,6))
@@ -96,10 +111,13 @@ export class DoSign implements AfterViewInit, OnDestroy{
                 ]);
               }
               this.asl2enWsError.set({
-                details: undefined,
+                type: 'ResponseWarning',
+                data: {
+                  details: undefined
+                }
               });
-            }else if( (msg as Asl2EnErrorDetail)?.details ){
-              this.asl2enWsError.set(msg as Asl2EnErrorDetail);
+            }else if( msg.type==StrResponseWarning ){
+              this.asl2enWsError.set(msg as ResponseWarning);
               if( this.asl2enPredictedGlosses().length>0 ){
                 this.clerkPatientMsgService.sendMsg(
                   this.asl2enPredictedGlosses().join(' ').replace(/\(.*\)/g, "")
