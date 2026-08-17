@@ -6,7 +6,7 @@ import { INIT_WS_MSG_CP, sleepAsync } from '../../tools';
 import { Asl2enService } from '../../service/asl2en-service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ResponseWarning, StrResponseWarning } from '../../model/errors-model';
-import { Asl2enPrediction, ConnectWs, ResponseAsl2enLandmark, ResponseAsl2enPrediction, StrResponseAsl2enPrediction } from '../../model/asl2en-model';
+import { Asl2enPrediction, ConnectWs, ResponseAsl2enLandmark, ResponseAsl2enPrediction, StrResponseAsl2enLandmark, StrResponseAsl2enPrediction } from '../../model/asl2en-model';
 import { ClerkPatientMessage } from '../../service/clerk-patient-message';
 import { ClerkPatientMsgModel, ConnectWsEasyMsg, StrConnectWsEasyMsg, StrWsEasyMsgUserA, StrWsEasyMsgUserB, WsEasyMsgUserA, WsEasyMsgUserB } from '../../model/clerk-patient-msg-model';
 
@@ -31,6 +31,15 @@ export class DoSign implements AfterViewInit, OnDestroy{
     type: 'ResponseWarning',
     data: {
       details: undefined
+    }
+  });
+  protected hasFacePoseLeftRightHandDetected: WritableSignal<ResponseAsl2enLandmark>= signal({
+    type: 'ResponseAsl2enLandmark',
+    data: {
+      face: false,
+      pose: false,
+      left_hand: false,
+      right_hand: false,
     }
   });
   protected asl2enPredictedGlosses: WritableSignal<Array<string>>= signal([]);
@@ -124,6 +133,8 @@ export class DoSign implements AfterViewInit, OnDestroy{
                 );
                 this.asl2enPredictedGlosses.set([]);
               }
+            }else if( msg.type==StrResponseAsl2enLandmark ){
+              this.hasFacePoseLeftRightHandDetected.set(msg as ResponseAsl2enLandmark);
             }
           });
       /* loop to get images for asl2en */

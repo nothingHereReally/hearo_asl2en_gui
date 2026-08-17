@@ -19,6 +19,18 @@
         gap-pad100-xl
         ">
           <div class="font-color-fail font-bold-regular">{{ asl2enWsError().data.details }}</div>
+          @if( hasFacePoseLeftRightHandDetected().data.face ){
+            <div class="font-color-success font-bold-regular">Face detected</div>
+          }@else{ <div class="font-color-fail font-bold-regular">X --> NO Face detected</div> }
+          @if( hasFacePoseLeftRightHandDetected().data.pose ){
+            <div class="font-color-success font-bold-regular">Upper Body detected</div>
+          }@else{ <div class="font-color-fail font-bold-regular">X --> NO Upper Body detected</div> }
+          @if( hasFacePoseLeftRightHandDetected().data.left_hand ){
+            <div class="font-color-success font-bold-regular">Left Hand detected</div>
+          }@else{ <div class="font-color-fail font-bold-regular">X --> NO Left Hand detected</div> }
+          @if( hasFacePoseLeftRightHandDetected().data.right_hand ){
+            <div class="font-color-success font-bold-regular">Right Hand detected</div>
+          }@else{ <div class="font-color-fail font-bold-regular">X --> NO Right Hand detected</div> }
           <video
               #videoEl
               class="
