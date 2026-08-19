@@ -9,11 +9,14 @@ import { ResponseWarning, StrResponseWarning } from '../../model/errors-model';
 import { Asl2enPrediction, ConnectWs, ResponseAsl2enLandmark, ResponseAsl2enPrediction, StrResponseAsl2enLandmark, StrResponseAsl2enPrediction } from '../../model/asl2en-model';
 import { ClerkPatientMessage } from '../../service/clerk-patient-message';
 import { ClerkPatientMsgModel, ConnectWsEasyMsg, StrConnectWsEasyMsg, StrWsEasyMsgUserA, StrWsEasyMsgUserB, WsEasyMsgUserA, WsEasyMsgUserB } from '../../model/clerk-patient-msg-model';
+import { Button } from '../../essential/button/button';
 
 
 @Component({
   selector: 'app-do-sign',
-  imports: [],
+  imports: [
+    Button
+  ],
   templateUrl: './do-sign.html',
   styleUrl: './do-sign.css',
 })
