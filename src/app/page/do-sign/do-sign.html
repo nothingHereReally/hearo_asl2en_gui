@@ -1,138 +1,95 @@
-<div>
-  <img class="
-  logo-height-48px
-  padding-left-right-pad100-lg
-  padding-top-bottom-pad100-lg
-  " src="/logo/hearo_logo.svg" alt="logo icon">
-  <div class="
-  flex-row
-  padding-left-right-pad100-xl
-  ">
-    <app-button
-        [btnText]="'Clerk'"
-        [styleButton]="'style-solid'"
-        [isUnderlined]="'underlined'"
-        [iconname]="'link'"
-        [linkURL]="'/clerk'"
-        [linkTarget]="'_blank'"
-        />
-  </div>
-
-  <div class="
-  flex-row
-  flex-wrap-row
+<main class="
+  flex-column-stretch
   gap-pad100-md
-  flex-justify-center
-  flex-align-center
+  width-100
   ">
-    @if( hasAllowedCamera() ){
-        <div class="
-        flex-column
-        flex-align-center
-        gap-pad100-xl
-        ">
-          <div class="font-color-fail font-bold-regular">{{ asl2enWsError().data.details }}</div>
-          @if( hasFacePoseLeftRightHandDetected().data.face ){
-            <div class="font-color-success font-bold-regular">Face detected</div>
-          }@else{ <div class="font-color-fail font-bold-regular">X --> NO Face detected</div> }
-          @if( hasFacePoseLeftRightHandDetected().data.pose ){
-            <div class="font-color-success font-bold-regular">Upper Body detected</div>
-          }@else{ <div class="font-color-fail font-bold-regular">X --> NO Upper Body detected</div> }
-          @if( hasFacePoseLeftRightHandDetected().data.left_hand ){
-            <div class="font-color-success font-bold-regular">Left Hand detected</div>
-          }@else{ <div class="font-color-fail font-bold-regular">X --> NO Left Hand detected</div> }
-          @if( hasFacePoseLeftRightHandDetected().data.right_hand ){
-            <div class="font-color-success font-bold-regular">Right Hand detected</div>
-          }@else{ <div class="font-color-fail font-bold-regular">X --> NO Right Hand detected</div> }
-          <video
-              #videoEl
-              class="
-              video-camera-reponsive
-              border-radius
-              ">
-          </video>
-        </div>
-        @if(asl2enWsPrediction().prediction.length!=0){
-            <div class="flex-column gap-pad100-xl">
-                <div class="
-                background-color-pc1-900
-                flex-column
-                gap-pad100-xs
-                padding-left-right-pad100-md
-                padding-top-bottom-pad100-md
-                font-color-pc1-300
-                border-radius
-                ">
-                @for(el of asl2enWsPrediction().prediction; track el.gloss){
-                    <div>{{ el.gloss }} {{ (el.accuracy*100).toFixed(2) }}%</div>
-                }
-                </div>
-                <div class="
-                text-wrap-391px-max-width
-                padding-left-right-pad100-md
-                padding-top-bottom-pad100-md
-                background-color-tc1-900
-                font-color-success
-                border-radius
-                ">sentence: {{ asl2enPredictedGlosses().join(' ') }}</div>
-            </div>
-        }
-        <div class="
-        text-wrap-391px-max-width
-        padding-left-right-pad100-md
-        padding-top-bottom-pad100-md
-        background-color-tc1-900
-        font-color-success
-        border-radius
-        " [hidden]="clerkPatientMsgReceivedSent().length==0">
-        @for(el of clerkPatientMsgReceivedSent(); track el.user_a){
-            @if( el.user_a!=undefined ){
-                <div>
-                @if( patientIs()=="user_a" ){<span>Patient:</span>}
-                @else{<span>Clerk:</span>}
-                {{ el.user_a }}
-                </div>
-            }@else{
-                <div>
-                @if( patientIs()=="user_b" ){<span>Patient:</span>}
-                @else{<span>Clerk:</span>}
-                {{ el.user_b }}
-                </div>
-            }
-        }
-        </div>
-    }@else{
-        <div class="
-        flex-row
-        gap-pad100-xs
-        flex-align-center
-        text-wrap-391px-max-width
-        border-radius
-        font-color-fail
-        background-color-fail
-        padding-left-right-pad100-xl
-        padding-top-bottom-pad100-xl
-        ">
-          <img class="logo-height-48px" src="/icon_tc3_500/info.svg" alt="red info icon">
-          <p class="font-normal-title">Please give us permission to
-              access the Camera for us to know the signs that you are
-              doing. If you haven’t blocked the camera access yet,
-              you can refresh this page for your browser to ask for
-              the camera permission again. Otherwise please unblock
-              us and allow us Camera access.
-          </p>
-        </div>
-        <div class="
-        flex-column
-        gap-pad100-md
-        flex-align-center
-        ">
-          <img class="logo-height-48px" src="/logo/hearo_logo.svg" alt="hearo logo">
-          <img class="logo-height-36px" src="/logo/hearo_word.svg" alt="hearo word">
-          <span>ASL to Gloss</span>
-        </div>
-    }
+  <header class="
+    flex-row-space-between
+    flex-align-center
+    gap-pad100-md
+    padding-left-right-pad200-md
+    padding-top-bottom-pad100-md
+    ">
+    <div class="
+      flex-row
+      flex-align-center
+      gap-pad100-md
+      ">
+      <img class="logo-height-48px" src="/logo/hearo_logo.svg" alt="Hearo">
+      <h1 class="font-bold-title">ASL to Gloss</h1>
+    </div>
+    <app-button
+      [btnText]="'Clerk'"
+      [styleButton]="'style-solid'"
+      [isUnderlined]="'underlined'"
+      [iconname]="'link'"
+      [linkURL]="'/clerk'"
+      [linkTarget]="'_blank'" />
+  </header>
+
+
+
+
+  <div class="
+    flex-row
+    flex-wrap-row
+    gap-pad100-xl
+    ">
+    <section class="
+      flex-column
+      gap-pad100-xl
+      flex-responsive-3
+      video-camera-reponsive
+      " aria-label="Sign Recognition">
+      <app-choose-model-card
+        [mode]="recognitionMode()"
+        (modeChange)="setRecognitionMode($event)" />
+      <app-asl2en-live-camera
+        [statusMessage]="asl2enWarning()"
+        [detectionStatus]="detectionStatus()"
+        (frameCaptured)="onCameraFrameCaptured($event)" />
+    </section>
+    <section class="
+      flex-column
+      gap-pad100-xs
+      flex-responsive-3
+      padding-left-right-pad100-md
+      padding-top-bottom-pad100-md
+      background-color-pc1-900
+      border-radius
+      " aria-label="Recognized sentence">
+      <app-asl2en-prediction-card
+        [mode]="recognitionMode()"
+        [predictions]="predictionItems()" />
+      <h3>Recognized sentence</h3>
+      <p class="font-color-success">{{ predictedGlosses().join(' ') || 'Your recognized signs will build into a sentence here.' }}</p>
+    </section>
   </div>
 
-  <div [hidden]="true"><canvas #canvasEl></canvas></div>
-</div>
+
+
+
+  @if (clerkMessages().length > 0) {
+    <section class="
+      flex-column
+      gap-pad100-xs
+      width-100
+      padding-left-right-pad100-md
+      padding-top-bottom-pad100-md
+      background-color-sc-900
+      border-24r-1w-pc1-300color
+      shadow-only
+      " aria-label="Clerk conversation" aria-live="polite">
+      <h2 class="font-bold-title">Conversation</h2>
+      @for (message of clerkMessages(); track $index) {
+        <p>
+          @if (message.user_a !== undefined) {
+            <strong>{{ patientIs() === 'user_a' ? 'Patient' : 'Clerk' }}:</strong> {{ message.user_a }}
+          } @else {
+            <strong>{{ patientIs() === 'user_b' ? 'Patient' : 'Clerk' }}:</strong> {{ message.user_b }}
+          }
+        </p>
+      }
+    </section>
+  }
+</main>
