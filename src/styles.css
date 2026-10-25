@@ -926,7 +926,7 @@ html, body {
 /* width configs */
 /* -------------------------------------------- */
 .video-camera-reponsive{
-  max-width: min(95vw, 800px);
+  max-width: min(95vw, 600px);
 }
 .width-inherit{
   width: inherit;
