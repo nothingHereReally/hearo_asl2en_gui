@@ -119,7 +119,7 @@ export class DoSign implements OnInit {
     this.predictionItems.set(predictions);
 
     const bestPrediction = predictions[0];
-    if (bestPrediction && (mode === 'exemplar' || bestPrediction.score > 0.75)) {
+    if (bestPrediction && (mode === 'exemplar' || bestPrediction.score > 0.75) && bestPrediction.gloss!=this.predictedGlosses().at(-1)) {
       this.predictedGlosses.update(glosses => [...glosses.slice(-7), bestPrediction.gloss]);
     }
 
