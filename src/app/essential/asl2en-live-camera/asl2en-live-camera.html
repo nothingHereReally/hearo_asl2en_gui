@@ -1,0 +1,208 @@
+<section class="
+flex-column-stretch
+gap-pad100-md
+width-100
+padding-left-right-pad100-md
+padding-top-bottom-pad100-md
+background-color-sc-900
+border-24r-1w-pc1-300color
+shadow-only
+">
+  <div class="
+    flex-row-space-between
+    flex-align-center
+    gap-pad100-md
+  ">
+    <section class="
+    flex-column
+    gap-pad100-lg
+    " aria-label="Camera controls">
+      <span
+        class="
+          flex-row
+          flex-align-center
+          gap-pad100-xs
+          padding-left-right-pad100-md
+          padding-top-bottom-pad100-xs
+          background-color-sc-800
+          border-radius
+          font-bold-regular
+        "
+        [class.background-color-tc1-900]="cameraStream() !== null"
+        [class.font-color-tc1-100]="cameraStream() !== null"
+        [class.background-color-tc3-900]="cameraStream() === null"
+        [class.font-color-fail]="cameraStream() === null"
+        >
+        <span class="
+          circle-dot
+        "
+        [class.background-color-tc1-400]="cameraStream() !== null"
+        [class.background-color-tc3-400]="cameraStream() === null"
+        aria-hidden="true"></span>
+        {{ cameraStream() ? 'Live' : 'Camera off' }}
+      </span>
+      <app-button
+        [btnText]="cameraStarting() ? 'Starting camera…' : cameraStream() ? 'Stop camera' : 'Start camera'"
+        [styleButton]="'style-solid'"
+        [isUnderlined]="'not-underlined'"
+        [disabled]="cameraStarting()"
+        (outOnClick)="toggleCamera()"
+        [iconname]="''"
+        />
+    </section>
+    @if( cameraStream() ){
+    <section class="
+      flex-row
+      flex-wrap-row
+      flex-align-center
+      gap-pad200-md
+    "
+    aria-label="Body detection status"
+    >
+      <span class="
+        flex-row
+        gap-pad100-xs
+        flex-align-center
+
+        padding-left-right-pad100-xl
+        padding-top-bottom-pad100-xs
+        border-radius
+        background-color-sc-800
+        font-color-sc-300
+      "
+      [class.background-color-tc1-900]="detectionStatus()?.face"
+      [class.font-color-tc1-100]="detectionStatus()?.face"
+      [class.background-color-tc3-900]="detectionStatus()?.face === false"
+      [class.font-color-fail]="detectionStatus()?.face === false"
+      >
+        <span class="
+          circle-dot
+        "
+        [class.background-color-tc1-400]="detectionStatus()?.face"
+        [class.background-color-tc3-400]="detectionStatus()?.face === false"
+        aria-hidden="true"></span>
+        <p>Face</p>
+      </span>
+      <span class="
+        flex-row
+        gap-pad100-xs
+        flex-align-center
+
+        padding-left-right-pad100-xl
+        padding-top-bottom-pad100-xs
+        border-radius
+        background-color-sc-800
+        font-color-sc-300
+      "
+      [class.background-color-tc1-900]="detectionStatus()?.pose"
+      [class.font-color-tc1-100]="detectionStatus()?.pose"
+      [class.background-color-tc3-900]="detectionStatus()?.pose === false"
+      [class.font-color-fail]="detectionStatus()?.pose === false"
+      >
+        <span class="
+          circle-dot
+        "
+        [class.background-color-tc1-400]="detectionStatus()?.pose"
+        [class.background-color-tc3-400]="detectionStatus()?.pose === false"
+        aria-hidden="true"></span>
+        <p>Upper body</p>
+      </span>
+      <span class="
+        flex-row
+        gap-pad100-xs
+        flex-align-center
+
+        padding-left-right-pad100-xl
+        padding-top-bottom-pad100-xs
+        border-radius
+        background-color-sc-800
+        font-color-sc-300
+      "
+      [class.background-color-tc1-900]="detectionStatus()?.left_hand"
+      [class.font-color-tc1-100]="detectionStatus()?.left_hand"
+      [class.background-color-tc3-900]="detectionStatus()?.left_hand === false"
+      [class.font-color-fail]="detectionStatus()?.left_hand === false"
+      >
+        <span class="
+          circle-dot
+        "
+        [class.background-color-tc1-400]="detectionStatus()?.left_hand"
+        [class.background-color-tc3-400]="detectionStatus()?.left_hand === false"
+        aria-hidden="true"></span>
+        <p>Light hand</p>
+      </span>
+      <span class="
+        flex-row
+        gap-pad100-xs
+        flex-align-center
+
+        padding-left-right-pad100-xl
+        padding-top-bottom-pad100-xs
+        border-radius
+        background-color-sc-800
+        font-color-sc-300
+      "
+      [class.background-color-tc1-900]="detectionStatus()?.right_hand"
+      [class.font-color-tc1-100]="detectionStatus()?.right_hand"
+      [class.background-color-tc3-900]="detectionStatus()?.right_hand === false"
+      [class.font-color-fail]="detectionStatus()?.right_hand === false"
+      >
+        <span class="
+          circle-dot
+        "
+        [class.background-color-tc1-400]="detectionStatus()?.right_hand"
+        [class.background-color-tc3-400]="detectionStatus()?.right_hand === false"
+        aria-hidden="true"></span>
+        <p>Right hand</p>
+      </span>
+    </section>
+    }
+  </div>
+
+  <video #videoEl autoplay muted playsinline hidden aria-hidden="true"></video>
+  <canvas
+    #canvasEl
+    class="
+      width-100
+    "
+    [hidden]="!cameraStream()"
+    [style.transform]="mirrored() ? 'scaleX(-1)' : null"
+    role="img"
+    aria-label="Square live camera preview"></canvas>
+  @if( ! cameraStream() ){
+    <p class="
+      flex-column
+      flex-align-center
+      padding-left-right-pad400-xs
+      padding-top-bottom-pad400-xs
+      background-color-sc-200
+      font-color-sc-900
+      border-radius
+    ">
+      {{ cameraStarting() ? 'Connecting to your camera…' : cameraError() || 'Start the camera to see your live preview.' }}
+    </p>
+  }
+
+  @if( cameraStream() ){
+  <span class="
+  flex-row
+  flex-align-center
+  flex-justify-start
+  gap-pad300-md
+  ">
+    <app-button
+      [btnText]="mirrored() ? 'Turn off mirror' : 'Mirror preview'"
+      [styleButton]="'style-solid'"
+      [isUnderlined]="'not-underlined'"
+      [disabled]="cameraStarting() || !cameraStream()"
+      (outOnClick)="toggleMirror()"
+      [iconname]="''"
+      />
+    @if( statusMessage() || cameraError() ){
+      <p class="
+        font-color-fail
+      " role="status">{{ statusMessage() || cameraError() }}</p>
+    }
+  </span>
+  }
+</section>
