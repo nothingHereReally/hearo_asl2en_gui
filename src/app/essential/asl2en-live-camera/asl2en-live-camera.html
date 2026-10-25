@@ -1,10 +1,8 @@
 <section class="
 flex-column-stretch
 gap-pad100-md
-width-100
 padding-left-right-pad100-md
 padding-top-bottom-pad100-md
-background-color-sc-900
 border-24r-1w-pc1-300color
 shadow-only
 ">
@@ -21,16 +19,12 @@ shadow-only
         class="
           flex-row
           flex-align-center
-          gap-pad100-xs
           padding-left-right-pad100-md
           padding-top-bottom-pad100-xs
-          background-color-sc-800
           border-radius
           font-bold-regular
         "
-        [class.background-color-tc1-900]="cameraStream() !== null"
-        [class.font-color-tc1-100]="cameraStream() !== null"
-        [class.background-color-tc3-900]="cameraStream() === null"
+        [class.font-color-success]="cameraStream() !== null"
         [class.font-color-fail]="cameraStream() === null"
         >
         <span class="
@@ -56,23 +50,18 @@ shadow-only
       flex-wrap-row
       flex-align-center
       gap-pad200-md
+      font-normal-regular
     "
     aria-label="Body detection status"
     >
       <span class="
         flex-row
-        gap-pad100-xs
         flex-align-center
 
-        padding-left-right-pad100-xl
-        padding-top-bottom-pad100-xs
         border-radius
-        background-color-sc-800
         font-color-sc-300
       "
-      [class.background-color-tc1-900]="detectionStatus()?.face"
-      [class.font-color-tc1-100]="detectionStatus()?.face"
-      [class.background-color-tc3-900]="detectionStatus()?.face === false"
+      [class.font-color-success]="detectionStatus()?.face"
       [class.font-color-fail]="detectionStatus()?.face === false"
       >
         <span class="
@@ -85,18 +74,12 @@ shadow-only
       </span>
       <span class="
         flex-row
-        gap-pad100-xs
         flex-align-center
 
-        padding-left-right-pad100-xl
-        padding-top-bottom-pad100-xs
         border-radius
-        background-color-sc-800
         font-color-sc-300
       "
-      [class.background-color-tc1-900]="detectionStatus()?.pose"
-      [class.font-color-tc1-100]="detectionStatus()?.pose"
-      [class.background-color-tc3-900]="detectionStatus()?.pose === false"
+      [class.font-color-success]="detectionStatus()?.pose"
       [class.font-color-fail]="detectionStatus()?.pose === false"
       >
         <span class="
@@ -109,18 +92,12 @@ shadow-only
       </span>
       <span class="
         flex-row
-        gap-pad100-xs
         flex-align-center
 
-        padding-left-right-pad100-xl
-        padding-top-bottom-pad100-xs
         border-radius
-        background-color-sc-800
         font-color-sc-300
       "
-      [class.background-color-tc1-900]="detectionStatus()?.left_hand"
-      [class.font-color-tc1-100]="detectionStatus()?.left_hand"
-      [class.background-color-tc3-900]="detectionStatus()?.left_hand === false"
+      [class.font-color-success]="detectionStatus()?.left_hand"
       [class.font-color-fail]="detectionStatus()?.left_hand === false"
       >
         <span class="
@@ -133,18 +110,12 @@ shadow-only
       </span>
       <span class="
         flex-row
-        gap-pad100-xs
         flex-align-center
 
-        padding-left-right-pad100-xl
-        padding-top-bottom-pad100-xs
         border-radius
-        background-color-sc-800
         font-color-sc-300
       "
-      [class.background-color-tc1-900]="detectionStatus()?.right_hand"
-      [class.font-color-tc1-100]="detectionStatus()?.right_hand"
-      [class.background-color-tc3-900]="detectionStatus()?.right_hand === false"
+      [class.font-color-success]="detectionStatus()?.right_hand"
       [class.font-color-fail]="detectionStatus()?.right_hand === false"
       >
         <span class="
