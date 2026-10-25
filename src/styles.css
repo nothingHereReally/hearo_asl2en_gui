@@ -807,6 +807,10 @@ html, body {
   flex: 1 2 20rem;
   min-width: 0;
 }
+.flex-responsive-3{
+  flex: 1 1 20rem;
+  min-width: 0;
+}
 .flex-row-button{
   display: flex;
   flex-direction: row;
