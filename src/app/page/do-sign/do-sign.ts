@@ -1,193 +1,171 @@
-import { AfterViewInit, Component, DestroyRef, ElementRef, inject, OnDestroy, Signal, signal, viewChild, WritableSignal } from '@angular/core';
-
-
-import { environment as env } from '../../../environment/environment';
-import { INIT_WS_MSG_CP, sleepAsync } from '../../tools';
-import { Asl2enService } from '../../service/asl2en-service';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ResponseWarning, StrResponseWarning } from '../../model/errors-model';
-import { Asl2enPrediction, ConnectWs, ResponseAsl2enLandmark, ResponseAsl2enPrediction, StrResponseAsl2enLandmark, StrResponseAsl2enPrediction } from '../../model/asl2en-model';
-import { ClerkPatientMessage } from '../../service/clerk-patient-message';
-import { ClerkPatientMsgModel, ConnectWsEasyMsg, StrConnectWsEasyMsg, StrWsEasyMsgUserA, StrWsEasyMsgUserB, WsEasyMsgUserA, WsEasyMsgUserB } from '../../model/clerk-patient-msg-model';
-import { Button } from '../../essential/button/button';
 
+import { Asl2enService } from '../../service/asl2en-service';
+import { ClerkPatientMessage } from '../../service/clerk-patient-message';
+import { INIT_WS_MSG_CP } from '../../tools';
+import {
+  Asl2enPredictionMode,
+  ConnectWs,
+  GlossScoreDict,
+  ResponseAsl2enExemplarPrediction,
+  ResponseAsl2enLandmark,
+  ResponseAsl2enPrediction,
+  StrResponseAsl2enExemplarPrediction,
+  StrResponseAsl2enLandmark,
+  StrResponseAsl2enPrediction,
+} from '../../model/asl2en-model';
+import { ResponseWarning, StrResponseWarning } from '../../model/errors-model';
+import {
+  ClerkPatientMsgModel,
+  ConnectWsEasyMsg,
+  StrConnectWsEasyMsg,
+  StrWsEasyMsgUserA,
+  WsEasyMsgUserA,
+  WsEasyMsgUserB,
+} from '../../model/clerk-patient-msg-model';
+import { Asl2enLiveCamera } from '../../essential/asl2en-live-camera/asl2en-live-camera';
+import { Asl2enPredictionCard } from '../../essential/asl2en-prediction-card/asl2en-prediction-card';
+import { Button } from '../../essential/button/button';
+import { ChooseModelCard } from '../../essential/choose-model-card/choose-model-card';
+
+type Asl2enMessage =
+  | ResponseAsl2enLandmark
+  | ResponseAsl2enPrediction
+  | ResponseAsl2enExemplarPrediction
+  | ResponseWarning
+  | ConnectWs;
+
+type ClerkPatientMessageEvent = ConnectWsEasyMsg | WsEasyMsgUserA | WsEasyMsgUserB;
 
 @Component({
   selector: 'app-do-sign',
-  imports: [
-    Button
-  ],
+  imports: [Button, Asl2enPredictionCard, Asl2enLiveCamera, ChooseModelCard],
   templateUrl: './do-sign.html',
-  styleUrl: './do-sign.css',
 })
-export class DoSign implements AfterViewInit, OnDestroy{
-  private destroyRef: DestroyRef= inject(DestroyRef)
-  private asl2enService: Asl2enService= inject(Asl2enService);
-  private clerkPatientMsgService: ClerkPatientMessage= inject(ClerkPatientMessage);
-  private keepVideoCameraRolling: WritableSignal<boolean>= signal(true);
-  protected hasAllowedCamera: WritableSignal<boolean>= signal(false);
-  protected asl2enWsPrediction: WritableSignal<Asl2enPrediction>= signal({
-    prediction: [],
-    asl2gloss_model: -1
-  })
-  protected asl2enWsError: WritableSignal<ResponseWarning>= signal({
-    type: 'ResponseWarning',
-    data: {
-      details: undefined
-    }
+export class DoSign implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly asl2enService = inject(Asl2enService);
+  private readonly clerkPatientMsgService = inject(ClerkPatientMessage);
+  private pendingImageRequests = Promise.resolve();
+
+  protected readonly recognitionMode = signal<Asl2enPredictionMode>('exemplar');
+  protected readonly predictionItems = signal<GlossScoreDict[]>([]);
+  protected readonly asl2enWarning = signal<string | undefined>(undefined);
+  protected readonly detectionStatus = signal<ResponseAsl2enLandmark['data']>({
+    face: false,
+    pose: false,
+    left_hand: false,
+    right_hand: false,
   });
-  protected hasFacePoseLeftRightHandDetected: WritableSignal<ResponseAsl2enLandmark>= signal({
-    type: 'ResponseAsl2enLandmark',
-    data: {
-      face: false,
-      pose: false,
-      left_hand: false,
-      right_hand: false,
-    }
-  });
-  protected asl2enPredictedGlosses: WritableSignal<Array<string>>= signal([]);
-  protected clerkPatientMsgReceivedSent: WritableSignal<Array<ClerkPatientMsgModel>>= signal([]);
-  protected patientIs: WritableSignal<string>= signal('');
+  protected readonly predictedGlosses = signal<string[]>([]);
+  protected readonly clerkMessages = signal<ClerkPatientMsgModel[]>([]);
+  protected readonly patientIs = signal<'user_a' | 'user_b' | ''>('');
 
+  public ngOnInit(): void {
+    this.clerkPatientMsgService.message$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(message => this.handleClerkPatientMessage(message));
 
-  readonly videoElRef: Signal<ElementRef<HTMLVideoElement>>= viewChild.required<ElementRef<HTMLVideoElement>>('videoEl');
-  private imgCanvas: Signal<ElementRef<HTMLCanvasElement>>= viewChild.required<ElementRef<HTMLCanvasElement>>('canvasEl');
-  private mediaStream?: MediaStream;
+    this.asl2enService.wsAsl2enMessage$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(message => this.handleAsl2enMessage(message));
 
-
-  public async ngAfterViewInit(): Promise<void>{
-    await this.__initVideoCameraAsync();
-  }
-  public ngOnDestroy(): void {
-    if( this.hasAllowedCamera() ){
-      this.__stopVideoCamera();
-    }
+    void this.sendClerkMessage(INIT_WS_MSG_CP);
   }
 
+  protected setRecognitionMode(mode: Asl2enPredictionMode): void {
+    this.recognitionMode.set(mode);
+    this.predictionItems.set([]);
+    this.predictedGlosses.set([]);
+  }
 
-  private async __initVideoCameraAsync(): Promise<void>{
-    try{
-      /* web-browser prompts user for camera access */
-      /* if not given permission be error */
-      this.hasAllowedCamera.set(true);
-      this.mediaStream= await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { min: 400, ideal: 700},
-          height: { min: 400, ideal: 700},
-          facingMode: 'user',
-          frameRate: { ideal: 24, max: 30}
-        },
-        audio: false
-      });
-      this.videoElRef().nativeElement.srcObject= this.mediaStream;
-      this.videoElRef().nativeElement.onloadedmetadata= ()=>{
-          this.videoElRef().nativeElement.play();
+  protected onCameraFrameCaptured(image: Blob): void {
+    const mode = this.recognitionMode();
+    this.pendingImageRequests = this.pendingImageRequests.then(async () => {
+      try {
+        await this.asl2enService.asl2en2ws(image, mode);
+      } catch (error) {
+        this.asl2enWarning.set(this.getErrorMessage(error, 'Failed to send camera image.'));
       }
-      this.clerkPatientMsgService.message$
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe((msg: ConnectWsEasyMsg|WsEasyMsgUserA|WsEasyMsgUserB)=>{
-            if( msg.type==StrConnectWsEasyMsg ){
-              this.patientIs.set((msg as ConnectWsEasyMsg).data.you_are);
-            }else if( msg.type==StrWsEasyMsgUserA ){
-              const msgFromUserA: string= (msg as WsEasyMsgUserA).data.user_a;
-              if( msgFromUserA!=INIT_WS_MSG_CP ){
-                this.clerkPatientMsgReceivedSent.update(arr=>[...arr, {
-                  'user_a': msgFromUserA,
-                  'user_b': undefined,
-                }]);
-              }
-            }else if( msg.type==StrWsEasyMsgUserB ){
-              const msgFromUserB: string= (msg as WsEasyMsgUserB).data.user_b;
-              if( msgFromUserB!=INIT_WS_MSG_CP ){
-                this.clerkPatientMsgReceivedSent.update(arr=>[...arr, {
-                  'user_a': undefined,
-                  'user_b': msgFromUserB,
-                }]);
-              }
-            }
-          });
-      await this.clerkPatientMsgService.sendMsg(INIT_WS_MSG_CP);
-      this.asl2enService.wsAsl2enMessage$
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe((msg: ResponseAsl2enLandmark|ResponseAsl2enPrediction|ResponseWarning|ConnectWs)=>{
-            if( msg.type==StrResponseAsl2enPrediction ){
-              this.asl2enWsPrediction.set((msg as ResponseAsl2enPrediction).data)
-              if( this.asl2enWsPrediction().prediction[0].accuracy > 0.75 ){
-                if( this.asl2enPredictedGlosses().length > 7 ){
-                  this.asl2enPredictedGlosses.update(arr=>arr.slice(0,6))
-                }
-                const top1gloss= this.asl2enWsPrediction().prediction[0]
-                this.asl2enPredictedGlosses.update(arr=>[
-                  ...arr,
-                  `${top1gloss.gloss}( ${(top1gloss.accuracy*100).toFixed(2)} )`
-                ]);
-              }
-              this.asl2enWsError.set({
-                type: 'ResponseWarning',
-                data: {
-                  details: undefined
-                }
-              });
-            }else if( msg.type==StrResponseWarning ){
-              this.asl2enWsError.set(msg as ResponseWarning);
-              if( this.asl2enPredictedGlosses().length>0 ){
-                this.clerkPatientMsgService.sendMsg(
-                  this.asl2enPredictedGlosses().join(' ').replace(/\(.*\)/g, "")
-                );
-                this.asl2enPredictedGlosses.set([]);
-              }
-            }else if( msg.type==StrResponseAsl2enLandmark ){
-              this.hasFacePoseLeftRightHandDetected.set(msg as ResponseAsl2enLandmark);
-            }
-          });
-      /* loop to get images for asl2en */
-      // sleepAsync(1000*18, ()=>{
-      //   this.__stopVideoCamera();
-      // });
-      while( this.keepVideoCameraRolling() && this.hasAllowedCamera() ){
-        await sleepAsync(env.TIME_DELAY_ASL2EN);
-        await this.__doAsl2en();
-      }
-    }catch(err){
-      /* denied camera access permission by user */
-      this.hasAllowedCamera.set(false);
-      /* this function does not ask for permission again */
-      /* needs refresh to ask again for permission */
-    }
+    });
   }
 
-
-
-
-  private async __doAsl2en(): Promise<void>{
-    const context= this.imgCanvas().nativeElement.getContext('2d');
-    const width: number= this.videoElRef().nativeElement.videoWidth;
-    const height: number= this.videoElRef().nativeElement.videoHeight;
-    if( width!=0 && height!=0 && context!=null ){
-      this.imgCanvas().nativeElement.width= this.videoElRef().nativeElement.videoWidth;
-      this.imgCanvas().nativeElement.height= this.videoElRef().nativeElement.videoHeight;
-      context.drawImage(this.videoElRef().nativeElement, 0, 0, width, height);
-
-
-      const imageBlob= await new Promise<Blob|null>(resolve =>
-        this.imgCanvas().nativeElement.toBlob(resolve, 'image/jpeg', 0.98)
-      );
-      if( imageBlob!=null ){
-        await this.asl2enService.asl2en2ws(imageBlob)
+  private handleAsl2enMessage(message: Asl2enMessage): void {
+    switch (message.type) {
+      case StrResponseAsl2enPrediction: {
+        const predictions = (message as ResponseAsl2enPrediction).data.prediction
+          .map(({ gloss, accuracy }) => ({ gloss, score: accuracy }));
+        this.updatePredictions(predictions, 'classic');
+        return;
+      }
+      case StrResponseAsl2enExemplarPrediction: {
+        const predictions = (message as ResponseAsl2enExemplarPrediction).data.prediction;
+        this.updatePredictions(predictions, 'exemplar');
+        return;
+      }
+      case StrResponseAsl2enLandmark:
+        this.detectionStatus.set((message as ResponseAsl2enLandmark).data);
+        return;
+      case StrResponseWarning: {
+        const warning = message as ResponseWarning;
+        this.asl2enWarning.set(warning.data.details);
+        void this.sendPredictedGlossesToClerk();
       }
     }
   }
 
+  private updatePredictions(predictions: GlossScoreDict[], mode: Asl2enPredictionMode): void {
+    this.predictionItems.set(predictions);
 
-
-
-  private __stopVideoCamera(): void{
-    this.keepVideoCameraRolling.set(false);
-    this.hasAllowedCamera.set(false);
-    if( this.mediaStream ){
-      this.mediaStream.getTracks().forEach(track=>{ track.stop(); });
+    const bestPrediction = predictions[0];
+    if (bestPrediction && (mode === 'exemplar' || bestPrediction.score > 0.75) && bestPrediction.gloss!=this.predictedGlosses().at(-1)) {
+      this.predictedGlosses.update(glosses => [...glosses.slice(-7), bestPrediction.gloss]);
     }
-    this.videoElRef().nativeElement.remove();
-    this.imgCanvas().nativeElement.remove();
+
+    this.asl2enWarning.set(undefined);
+  }
+
+  private handleClerkPatientMessage(message: ClerkPatientMessageEvent): void {
+    if (message.type === StrConnectWsEasyMsg) {
+      this.patientIs.set((message as ConnectWsEasyMsg).data.you_are);
+      return;
+    }
+
+    const isUserA = message.type === StrWsEasyMsgUserA;
+    const text = isUserA
+      ? (message as WsEasyMsgUserA).data.user_a
+      : (message as WsEasyMsgUserB).data.user_b;
+    if (text === INIT_WS_MSG_CP) return;
+
+    this.clerkMessages.update(messages => [...messages, {
+      user_a: isUserA ? text : undefined,
+      user_b: isUserA ? undefined : text,
+    }]);
+  }
+
+  private async sendPredictedGlossesToClerk(): Promise<void> {
+    const glosses = this.predictedGlosses();
+    if (glosses.length === 0) return;
+
+    this.predictedGlosses.set([]);
+    const sent = await this.sendClerkMessage(glosses.join(' '));
+    if (!sent) {
+      this.predictedGlosses.update(current => [...glosses, ...current].slice(-8));
+    }
+  }
+
+  private async sendClerkMessage(message: string): Promise<boolean> {
+    try {
+      await this.clerkPatientMsgService.sendMsg(message);
+      return true;
+    } catch (error) {
+      this.asl2enWarning.set(this.getErrorMessage(error, 'Unable to send the clerk message.'));
+      return false;
+    }
+  }
+
+  private getErrorMessage(error: unknown, fallback: string): string {
+    return error instanceof Error ? error.message : fallback;
   }
 }

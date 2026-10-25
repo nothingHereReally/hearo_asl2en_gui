@@ -47,3 +47,20 @@ export interface ResponseAsl2enPrediction{
   type: 'ResponseAsl2enPrediction';
   data: Asl2enPrediction;
 }
+
+
+export interface GlossScoreDict{
+  gloss: string;
+  score: number;
+}
+export interface Asl2enExemplarPrediction{
+  prediction: Array<GlossScoreDict>;
+}
+export const StrResponseAsl2enExemplarPrediction: string= 'ResponseAsl2enExemplarPrediction';
+export interface ResponseAsl2enExemplarPrediction{
+  type: 'ResponseAsl2enExemplarPrediction';
+  data: Asl2enExemplarPrediction;
+}
+
+
+export type Asl2enPredictionMode= 'classic'|'exemplar';

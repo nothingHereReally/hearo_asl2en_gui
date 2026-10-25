@@ -12,6 +12,7 @@ import {
     ResponseAsl2enImageInit,
     ResponseAsl2enLandmark,
     ResponseAsl2enPrediction,
+    ResponseAsl2enExemplarPrediction,
     StrResponseAsl2enImageInit
 } from '../model/asl2en-model';
 import { ResponseWarning } from '../model/errors-model';
@@ -25,8 +26,10 @@ import { API_PREFIX } from '../tools';
 export class Asl2enService{
   private readonly http: HttpClient= inject(HttpClient);
   private wsAsl2en: WebSocket|undefined= undefined;
-  public readonly wsAsl2enMessage$: Subject<ResponseAsl2enLandmark|ResponseWarning|ResponseAsl2enPrediction|ConnectWs>= new Subject<ResponseAsl2enLandmark|ResponseWarning|ResponseAsl2enPrediction|ConnectWs>();
+  private wsUuid: string|undefined;
+  public readonly wsAsl2enMessage$: Subject<ResponseAsl2enLandmark|ResponseWarning|ResponseAsl2enPrediction|ResponseAsl2enExemplarPrediction|ConnectWs>= new Subject<ResponseAsl2enLandmark|ResponseWarning|ResponseAsl2enPrediction|ResponseAsl2enExemplarPrediction|ConnectWs>();
   private asl2enWsHttpPostUuid: string= "init";
+  private sessionMode: 'classic'|'exemplar'= 'exemplar';
 
 
   public asl2enSolo(images: Array<Blob>): Observable<Asl2enPrediction>{
@@ -49,44 +52,59 @@ export class Asl2enService{
 
 
   private __asl2enWsConnect(): Promise<void>{
-    if( this.wsAsl2en?.readyState === WebSocket.OPEN ){
+    if( this.wsAsl2en?.readyState === WebSocket.OPEN && this.wsUuid === this.asl2enWsHttpPostUuid ){
       return Promise.resolve();
     }
 
     return new Promise((resolve, reject)=> {
-      this.wsAsl2en= new WebSocket(`${env.API_DOMAIN.ws}${API_PREFIX}/asl2en/${this.asl2enWsHttpPostUuid}/`);
-      this.wsAsl2en.onopen= ()=>{ resolve(); };
+      this.closeWsAsl2en();
+      const socket= new WebSocket(`${env.API_DOMAIN.ws}${API_PREFIX}/asl2en/${this.asl2enWsHttpPostUuid}/`);
+      this.wsAsl2en= socket;
+      this.wsUuid= this.asl2enWsHttpPostUuid;
+      socket.onopen= ()=>{ resolve(); };
 
-      this.wsAsl2en.onerror= ()=>{ reject(
+      socket.onerror= ()=>{ reject(
         new Error(`Failed to connect to WebSocket ${env.API_DOMAIN.ws}${API_PREFIX}/asl2en/${this.asl2enWsHttpPostUuid}/`)
       ); };
 
-      this.wsAsl2en.onmessage= (event)=>{
+      socket.onmessage= (event)=>{
         this.wsAsl2enMessage$.next(JSON.parse(event.data));
       };
 
-      this.wsAsl2en.onclose= ()=>{ this.wsAsl2en= undefined; };
+      socket.onclose= ()=>{
+        if( this.wsAsl2en === socket ){
+          this.wsAsl2en= undefined;
+          this.wsUuid= undefined;
+        }
+      };
     });
   }
   public closeWsAsl2en(): void{
-    if( this.wsAsl2en?.readyState===WebSocket.OPEN){
+    if( this.wsAsl2en && this.wsAsl2en.readyState < WebSocket.CLOSING ){
       this.wsAsl2en?.close(1000, 'Recommended to close, due to No hands for a long time was detected');
     }
   }
-  public async asl2en2ws(image: Blob): Promise<string>{
+  public async asl2en2ws(image: Blob, mode: 'classic'|'exemplar'= 'exemplar'): Promise<string>{
+    if( mode !== this.sessionMode ){
+      this.closeWsAsl2en();
+      this.asl2enWsHttpPostUuid= 'init';
+      this.sessionMode= mode;
+    }
     let asl2en: ResponseAsl2enImageInit|ResponseAsl2enImage;
     const formData: FormData= new FormData();
     formData.append('image', image, 'image.jpeg');
+    const endpoint= mode === 'exemplar' ? 'asl2en-exemplar' : 'asl2en';
     try{
       asl2en= await firstValueFrom(this.http.post<ResponseAsl2enImageInit|ResponseAsl2enImage>(
-        `${env.API_DOMAIN.http}${API_PREFIX}/asl2en/${this.asl2enWsHttpPostUuid}/`,
+        `${env.API_DOMAIN.http}${API_PREFIX}/${endpoint}/${this.asl2enWsHttpPostUuid}/`,
         formData,
         { observe: 'body' }
       ));
     }catch(err){
+      this.closeWsAsl2en();
       this.asl2enWsHttpPostUuid= 'init';
       asl2en= await firstValueFrom(this.http.post<ResponseAsl2enImageInit>(
-        `${env.API_DOMAIN.http}${API_PREFIX}/asl2en/${this.asl2enWsHttpPostUuid}/`,
+        `${env.API_DOMAIN.http}${API_PREFIX}/${endpoint}/${this.asl2enWsHttpPostUuid}/`,
         formData,
         { observe: 'body' }
       ));

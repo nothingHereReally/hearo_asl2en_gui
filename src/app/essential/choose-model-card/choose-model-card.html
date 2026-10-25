@@ -1,0 +1,37 @@
+<section class="
+  flex-row
+  flex-align-center
+  flex-justify-start
+  gap-pad200-xs
+  padding-left-right-pad100-xl
+  border-24r-1w-pc1-300color
+  " aria-label="Recognition mode controls">
+  <h2 class="font-bold-title">Sign recognition</h2>
+  <fieldset class="
+    flex-row
+    flex-wrap-row
+    flex-align-center
+    gap-pad100-md
+    padding-left-right-pad100-xs
+    padding-top-bottom-pad100-xs
+    border-none
+    ">
+    <!-- <legend class="font-bold-regular">Recognition mode</legend> -->
+    <label class="flex-row flex-align-center gap-pad100-xs">
+      <input
+        type="radio"
+        name="recognitionMode"
+        [checked]="mode() === 'classic'"
+        (change)="modeChange.emit('classic')">
+      Classic
+    </label>
+    <label class="flex-row flex-align-center gap-pad100-xs">
+      <input
+        type="radio"
+        name="recognitionMode"
+        [checked]="mode() === 'exemplar'"
+        (change)="modeChange.emit('exemplar')">
+      Exemplar
+    </label>
+  </fieldset>
+</section>

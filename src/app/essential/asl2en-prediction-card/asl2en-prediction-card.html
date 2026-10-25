@@ -1,0 +1,67 @@
+<section class="
+flex-column
+gap-pad100-md
+" aria-label="Predicted glosses" aria-live="polite">
+  <div class="
+  flex-row
+  flex-wrap-row
+  flex-justify-space-between
+  flex-align-center
+  gap-pad100-xs
+  ">
+    <div class="
+    flex-column
+    gap-pad100-xs
+    ">
+      <p class="
+      font-bold-regular
+      font-color-sc-500
+      ">
+        {{ mode() === 'exemplar' ? 'Exemplar - lower score is better' : 'Classic - higher accuracy is better' }}
+      </p>
+      <h2 class="font-bold-title">Predicted glosses</h2>
+    </div>
+    <span class="
+    font-bold-regular
+    font-color-sc-400
+    ">{{ visiblePredictions().length }} / 10</span>
+  </div>
+
+  @if (visiblePredictions().length > 0) {
+    <div class="
+    flex-column
+    gap-pad100-xs
+    ">
+      @for (prediction of visiblePredictions(); track $index) {
+        <div class="
+        flex-row
+        flex-wrap-row
+        flex-justify-space-between
+        flex-align-center
+        gap-pad100-xs
+        padding-left-right-pad100-md
+        padding-top-bottom-pad100-xs
+        background-color-pc1-900
+        border-radius
+        ">
+          <span class="
+          font-bold-regular
+          font-color-sc-500
+          ">{{ $index + 1 }}</span>
+          <span class="font-bold-wild">{{ prediction.gloss }}</span>
+          @if (mode() === 'classic') {
+            <span class="font-bold-regular">{{
+                (prediction.score * 100).toFixed(1)
+            }}%</span>
+          } @else {
+            <span class="font-bold-regular">Score {{
+                prediction.score.toFixed(4)
+            }}</span>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="font-color-sc-400">Predictions will appear here while you sign.</p>
+  }
+</section>

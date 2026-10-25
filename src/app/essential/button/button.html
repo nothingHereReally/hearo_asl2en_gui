@@ -12,6 +12,7 @@
     (mouseleave)="initIcon()"
     (mousedown)="onPressing()"
     (mouseup)="onHover()"
+    [disabled]="disabled()"
   >
     @if(iconfiledir()!=''){
       <img [src]="iconfiledir()" [alt]="iconfiledir()" class='icon-botton-size'>

@@ -21,6 +21,7 @@ import { API_PREFIX } from '../tools';
 export class ClerkPatientMessage{
   private http: HttpClient= inject(HttpClient);
   private uuidMsg: string= 'init';
+  private uuidRequest: Promise<string>|undefined;
   private wsConnection: WebSocket|undefined= undefined;
   public readonly message$: Subject<ConnectWsEasyMsg|WsEasyMsgUserA|WsEasyMsgUserB>= new Subject<ConnectWsEasyMsg|WsEasyMsgUserA|WsEasyMsgUserB>();
 
@@ -39,26 +40,48 @@ export class ClerkPatientMessage{
       return Promise.resolve();
     }
 
+    const url= `${env.API_DOMAIN.ws}${API_PREFIX}/easy-ws-message/${this.uuidMsg}/`;
+    if( this.wsConnection?.readyState === WebSocket.CONNECTING ){
+      const socket= this.wsConnection;
+      return new Promise((resolve, reject)=>{
+        socket.addEventListener('open', ()=>resolve(), { once: true });
+        const fail=(): void=>reject(new Error(`Failed to connect to WebSocket ${url}`));
+        socket.addEventListener('error', fail, { once: true });
+        socket.addEventListener('close', fail, { once: true });
+      });
+    }
+
     return new Promise((resolve, reject)=> {
-      this.wsConnection= new WebSocket(`${env.API_DOMAIN.ws}${API_PREFIX}/easy-ws-message/${this.uuidMsg}/`);
-      this.wsConnection.onopen= ()=>{ resolve(); };
+      const socket= new WebSocket(url);
+      this.wsConnection= socket;
+      socket.onopen= ()=>{ resolve(); };
 
-      this.wsConnection.onerror= ()=>{ reject(
-        new Error(`Failed to connect to WebSocket ${env.API_DOMAIN.ws}${API_PREFIX}/easy-ws-message/${this.uuidMsg}/`)
-      ); };
+      socket.onerror= ()=>{ reject(new Error(`Failed to connect to WebSocket ${url}`)); };
 
-      this.wsConnection.onmessage= (event)=>{
+      socket.onmessage= (event)=>{
         this.message$.next(JSON.parse(event.data));
       };
 
-      this.wsConnection.onclose= ()=>{ this.wsConnection= undefined; };
+      socket.onclose= ()=>{
+        if( this.wsConnection === socket ) this.wsConnection= undefined;
+        reject(new Error(`WebSocket closed before sending to ${url}`));
+      };
     });
   }
   public async sendMsg(message: string): Promise<void>{
     if( this.uuidMsg=='init' ){
-      this.uuidMsg= await this.__getUuid();
-      await this.__connectWs();
+      this.uuidRequest ??= this.__getUuid();
+      try{
+        this.uuidMsg= await this.uuidRequest;
+      }finally{
+        this.uuidRequest= undefined;
+      }
     }
-    this.wsConnection?.send(message);
+    await this.__connectWs();
+    const socket= this.wsConnection;
+    if( socket?.readyState !== WebSocket.OPEN ){
+      throw new Error('Clerk message WebSocket is not open.');
+    }
+    socket.send(message);
   }
 }
