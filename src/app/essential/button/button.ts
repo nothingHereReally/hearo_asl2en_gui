@@ -28,6 +28,7 @@ export class Button implements OnInit{
   >= input.required();
   readonly iconname: InputSignal<string>= input<string>('');
   readonly isUnderlined: InputSignal<'not-underlined'|'underlined'>= input<'not-underlined'|'underlined'>('not-underlined');
+  readonly disabled: InputSignal<boolean>= input<boolean>(false);
   readonly linkURL: InputSignal<string>= input<string>('');
   readonly linkTarget: InputSignal<'_blank'|'_self'>= input<'_blank'|'_self'>('_blank');
   protected iconfiledir: WritableSignal<string>= signal<string>('');
