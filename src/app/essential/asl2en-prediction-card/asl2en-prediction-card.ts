@@ -1,10 +1,8 @@
 import { Component, computed, input } from '@angular/core';
 
-export type Asl2enPredictionMode= 'classic'|'exemplar';
-export interface Asl2enGlossPrediction{
-  gloss: string;
-  score: number;
-}
+
+import { Asl2enPredictionMode, GlossScoreDict } from '../../model/asl2en-model';
+
 
 @Component({
   selector: 'app-asl2en-prediction-card',
@@ -13,6 +11,6 @@ export interface Asl2enGlossPrediction{
 })
 export class Asl2enPredictionCard{
   readonly mode= input.required<Asl2enPredictionMode>();
-  readonly predictions= input.required<Asl2enGlossPrediction[]>();
+  readonly predictions= input.required<Array<GlossScoreDict>>();
   protected readonly visiblePredictions= computed(()=>this.predictions().slice(0, 10));
 }

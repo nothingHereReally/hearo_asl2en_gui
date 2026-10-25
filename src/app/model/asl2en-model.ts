@@ -61,3 +61,6 @@ export interface ResponseAsl2enExemplarPrediction{
   type: 'ResponseAsl2enExemplarPrediction';
   data: Asl2enExemplarPrediction;
 }
+
+
+export type Asl2enPredictionMode= 'classic'|'exemplar';
